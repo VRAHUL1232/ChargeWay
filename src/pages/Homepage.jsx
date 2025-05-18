@@ -410,10 +410,10 @@ export default function Homepage() {
             <div className="w-full flex flex-wrap justify-between items-center gap-4">
               <h1 className="text-xl sm:text-2xl xl:text-4xl font-bold text-green-500">ChargeWay</h1>
               <div className="flex flex-row justify-between gap-3 items-center">
-                <Header4>About Us</Header4>
+                <Header4>About</Header4>
                 <Header4>Products</Header4>
                 <Header4>Community</Header4>
-                <Header4>Contact Us</Header4>
+                <Header4>Contact</Header4>
                 <Header4>Carriers</Header4>
               </div>
             </div>
