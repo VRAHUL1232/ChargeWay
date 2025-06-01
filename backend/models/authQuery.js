@@ -1,3 +1,4 @@
+const { json } = require('express');
 const pool = require('../config/db');
 
 const createTables = async () => {
@@ -15,15 +16,15 @@ const createUser = async (username, email, password)=> {
       username,
       email,
       password,
-      "user",
+      "User",
     ])
 }
 
-const findUser = async (email)=> {
-    const user = await pool
+const findUser = async (email,role)=> {
+    const [user] = await pool
     .query("SELECT * FROM AUTH WHERE EMAIL=? AND ROLE=?", [
       email,
-      "user"
+      role
     ])
     return user;
 }

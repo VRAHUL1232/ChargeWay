@@ -1,6 +1,9 @@
-function SecondaryButton({ children, style }) {
+import Contact from "../pages/Contact";
+import Profile from "../pages/Profile";
+
+function SecondaryButton({ children, style, onClickFunction }) {
   return (
-    <button className={`px-2 py-1 lg:px-3 lg:py-2 rounded ${style}`}>
+    <button onClick={onClickFunction} className={`px-2 py-1 lg:px-3 lg:py-2 rounded ${style}`}>
       {children}
     </button>
   );

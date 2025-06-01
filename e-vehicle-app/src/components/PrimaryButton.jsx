@@ -1,7 +1,10 @@
-function PrimaryButton({ children, style }) {
+import Contact from "../pages/Contact";
+
+function PrimaryButton({ children, style, onClickFunction }) {
   return (
     <button
-      className={`lg:text-xl px-2 py-1 sm:px-6 sm:py-3 lg:px-9 lg:py-4 rounded font-medium ${style}`}
+      onClick={onClickFunction}
+      className={`font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl ${style}`}
     >
       {children}
     </button>

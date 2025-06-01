@@ -19,12 +19,23 @@ import article1 from "../assets/article1.jpg";
 import article2 from "../assets/article2.jpg";
 import article3 from "../assets/article3.jpg";
 import { Facebook, Instagram, Linkedin, Twitter, X } from "lucide-react";
+import { Navigate, useNavigate } from "react-router-dom";
 
 export default function Homepage() {
+  const navigate = useNavigate();
+
+  const redirectLogin = () => {
+    navigate("/login");
+  };
+
+  const redirectSignUp = () => {
+    navigate("/register");
+  };
+
   return (
     <div className="font-sans">
       {/* Header */}
-      <header className="bg-white p-4 shadow-sm">
+      <header className="bg-white p-2 sm:p-4 shadow-sm">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center">
             <h1
@@ -33,13 +44,15 @@ export default function Homepage() {
               <span>ChargeWay</span>
             </h1>
           </div>
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4">
             <SecondaryButton
+              onClickFunction={redirectLogin}
               style={`hover:bg-green-600 text-white bg-green-500`}
             >
               Login
             </SecondaryButton>
             <SecondaryButton
+              onClickFunction={redirectSignUp}
               style={`border border-green-500 hover:bg-gray-50 text-green-500`}
             >
               Sign Up
@@ -61,7 +74,10 @@ export default function Homepage() {
               Offering sustainable charging solutions for electric vehicles to
               power the future of transportation.
             </Header4>
-            <PrimaryButton style={`bg-green-500 hover:bg-green-600 text-white`}>
+            <PrimaryButton
+              onClickFunction={redirectLogin}
+              style={`px-2 py-1 sm:px-6 sm:py-3 lg:px-9 lg:py-4 text-md lg:text-xl bg-green-500 hover:bg-green-600 text-white`}
+            >
               Get Started
             </PrimaryButton>
           </div>
@@ -99,6 +115,7 @@ export default function Homepage() {
                         Convenient charging solutions for your home
                       </Header4>
                       <SecondaryButton
+                        onClickFunction={redirectLogin}
                         style={`bg-green-500 hover:bg-green-600 text-white`}
                       >
                         Learn More
@@ -120,6 +137,7 @@ export default function Homepage() {
                         Accessible charging points for all EV users
                       </Header4>
                       <SecondaryButton
+                        onClickFunction={redirectLogin}
                         style={`bg-green-500 hover:bg-green-600 text-white`}
                       >
                         Learn More
@@ -143,6 +161,7 @@ export default function Homepage() {
                         Scalable systems with good infreastructure
                       </Header4>
                       <SecondaryButton
+                        onClickFunction={redirectLogin}
                         style={`bg-green-500 hover:bg-green-600 text-white`}
                       >
                         Learn More
@@ -425,7 +444,7 @@ export default function Homepage() {
             <h1 className="text-xl sm:text-2xl xl:text-4xl font-bold text-green-500">
               ChargeWay
             </h1>
-            <div className="flex flex-row justify-between gap-3 items-center">
+            <div className="flex flex-wrap justify-between gap-3 items-center">
               <Header4>About</Header4>
               <Header4>Products</Header4>
               <Header4>Community</Header4>
