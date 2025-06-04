@@ -12,18 +12,19 @@ app.use(express.json());
 const login = async (req, res) => {
   try {
     const { email, password, role } = req.body;
-    const user = await query.findUser(email,role);
-    if (!user || user.length!=1){
-      return res.status(404).json({error: `${role} Not Found!`});
+    console.log(email, password, role);
+    const user = await query.findUser(email, role);
+    if (!user || user.length != 1) {
+      return res.status(404).json({ error: `${role} Not Found!` });
     }
     const userPassword = user[0].PASSWORD;
-    if (!(await bcrypt.compare(password,userPassword))){
-      return res.status(401).json({error: "Password is Incorrect."});
+    if (!(await bcrypt.compare(password, userPassword))) {
+      return res.status(401).json({ error: "Password is Incorrect." });
     }
     const token = jwt.sign({ email }, process.env.SECRETKEY, {
       expiresIn: "1h",
     });
-    return res.status(201).json({token: token});
+    return res.status(201).json({ token: token });
   } catch (err) {
     console.log(err);
     return res.status(500).json({ error: err });
@@ -34,12 +35,15 @@ const register = async (req, res) => {
   try {
     const { fullName, email, password } = req.body;
     const hashed = await bcrypt.hash(password, 10);
-    const user = await query.findUser(email);
-    if (user && user.length!=0) {
-      return res.status(409).json({error: "User already exists."})
+    const user = await query.findUser(email, "User");
+    if (user && user.length != 0) {
+      return res.status(409).json({ error: "User already exists." });
     }
-    await query.createUser(fullName,email,hashed);
-    return res.status(200).json({message:"User created successfully."});
+    await query.createUser(fullName, email, hashed);
+    const token = jwt.sign({ email }, process.env.SECRETKEY, {
+      expiresIn: "1h",
+    });
+    return res.status(201).json({ token: token, message: "User created successfully" });
   } catch (err) {
     console.log(err);
     return res.status(500).json({ error: err });

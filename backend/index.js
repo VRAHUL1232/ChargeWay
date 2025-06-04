@@ -5,10 +5,7 @@ const app = express()
 
 app.use(express.json())
 
-app.use(cors({
-  origin: 'http://localhost:5173',
-  credentials: true 
-}));
+app.use(cors());
 
 const PORT = process.env.PORT || 3000
 const query = require('./models/authQuery')
@@ -22,6 +19,6 @@ app.get('/',(req,res)=>{
 
 app.use('/',authRoute);
 
-app.listen(PORT,()=>{
-    console.log(`Server is running in ${PORT}`);
+app.listen(PORT ,()=>{
+    console.log(`Server is running in http://localhost:${PORT}`);
 })

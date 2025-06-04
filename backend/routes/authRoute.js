@@ -10,4 +10,6 @@ router.post('/register', authController.register);
 
 router.get('/logout',authMiddleware.authenticate, authController.logout);
 
+router.get('/userauth',authMiddleware.isVerified);
+
 module.exports = router;

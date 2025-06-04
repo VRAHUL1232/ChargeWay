@@ -7,7 +7,7 @@ import SecondaryButton from "../components/Secondarybutton";
 import PrimaryButton from "../components/PrimaryButton";
 import Spinner from "../components/Spinner";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 
 const AuthPage = ({ isLogin }) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -23,7 +23,7 @@ const AuthPage = ({ isLogin }) => {
   const [loginForm, setLoginForm] = useState({
     email: "",
     password: "",
-    role: "User"
+    role: "User",
   });
 
   const [signupForm, setSignupForm] = useState({
@@ -36,6 +36,7 @@ const AuthPage = ({ isLogin }) => {
     setLoginForm({
       email: "",
       password: "",
+      role: "User",
     });
     setSignupForm({
       fullName: "",
@@ -230,9 +231,10 @@ const AuthPage = ({ isLogin }) => {
     }
   };
 
-  const addLocalStorage = (token,role)=>{
-    console.log(token,role);
-  }
+  const addLocalStorage = (token, role) => {
+    localStorage.setItem("token", token);
+    localStorage.setItem("role", role);
+  };
 
   const handleLoginSubmit = async (e) => {
     try {
@@ -242,10 +244,11 @@ const AuthPage = ({ isLogin }) => {
       }
       setIsLoading(true);
       const { email, password, role } = loginForm;
-      const response = await axios.post("http://localhost:3000/login", {
+      console.log(email, password, role);
+      const response = await axios.post(`http://localhost:3000/login`, {
         email,
         password,
-        role
+        role,
       });
       if (response.status === 201) {
         console.log("✅ User Login successfully:", response.data);
@@ -253,8 +256,8 @@ const AuthPage = ({ isLogin }) => {
       const token = response.data.token;
       resetData();
       setSubmitError("");
-      addLocalStorage(token,role);
-      (role=="User") ? navigate("/contact") : navigate("/adminpanel");
+      addLocalStorage(token, role);
+      role == "User" ? navigate("/contact") : navigate("/adminpanel");
     } catch (err) {
       if (err.response) {
         const { data } = err.response;
@@ -284,7 +287,7 @@ const AuthPage = ({ isLogin }) => {
       setIsLoading(true);
 
       const { fullName, email, password } = signupForm;
-      const response = await axios.post("http://localhost:3000/register", {
+      const response = await axios.post(`http://localhost:3000/register`, {
         fullName,
         email,
         password,
@@ -294,8 +297,10 @@ const AuthPage = ({ isLogin }) => {
         console.log("✅ User created successfully:");
       }
       console.log("Signup submitted:", response);
+      const token = response.data.token;
+      addLocalStorage(token, "User");
       resetData();
-      navigate("/login", { replace: true });
+      navigate("/contact");
     } catch (err) {
       if (err.response) {
         const { data } = err.response;
@@ -313,8 +318,8 @@ const AuthPage = ({ isLogin }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center px-3 py-1 sm:p-4 font-sans">
-      <div className="w-full max-w-md sm:w-1/2 sm:max-w-2xl container mx-auto">
+    <div className="min-h-dvh bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center p-4 sm:p-4 font-sans">
+      <div className="w-full max-w-md sm:w-1/2 sm:h-auto sm:max-w-2xl container mx-auto">
         {/* Card Container */}
         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
           {/* Header */}
@@ -333,7 +338,7 @@ const AuthPage = ({ isLogin }) => {
           <div className="px-4 sm:px-8 py-2 sm:py-8 flex flex-col justify-between gap-2 sm:gap-4">
             {/* Login Form */}
             {isLogin ? (
-              <div className="flex flex-col gap-2 sm:gap-4">
+              <div className="flex flex-col gap-3 sm:gap-4">
                 {/* Email Field */}
                 <div>
                   <label className="text-sm font-medium sm:text-md text-gray-700 mb-2">
@@ -346,7 +351,7 @@ const AuthPage = ({ isLogin }) => {
                       value={loginForm.email}
                       onChange={handleLoginChange}
                       placeholder="Enter your email"
-                      className="w-full px-2 py-1 sm:px-4 sm:py-2 text-md sm:text-lg  border border-gray-300 rounded-sm sm:rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                      className="w-full p-2 sm:px-4 sm:py-2 text-md sm:text-lg  border border-gray-300 rounded-sm sm:rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                       required
                     />
                   </div>
@@ -367,7 +372,7 @@ const AuthPage = ({ isLogin }) => {
                       value={loginForm.password}
                       onChange={handleLoginChange}
                       placeholder="Enter your password"
-                      className="w-full pl-2 pr-8 py-1 sm:px-4 sm:py-2 text-md sm:text-lg border border-gray-300 rounded-sm sm:rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                      className="w-full pl-2 pr-8 py-2 sm:px-4 sm:py-2 text-md sm:text-lg border border-gray-300 rounded-sm sm:rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                       required
                     />
                     <button
@@ -396,7 +401,7 @@ const AuthPage = ({ isLogin }) => {
                       name="role"
                       value={loginForm.role}
                       onChange={handleLoginChange}
-                      className="w-full pl-2 pr-8 py-1 sm:px-4 sm:py-2 text-md sm:text-lg border border-gray-300 rounded-sm sm:rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                      className="w-full pl-2 pr-8 py-2 sm:px-4 sm:py-2 text-md sm:text-lg border border-gray-300 rounded-sm sm:rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                     >
                       <option value="User">User</option>
                       <option value="Admin">Admin</option>
@@ -418,7 +423,7 @@ const AuthPage = ({ isLogin }) => {
                 )}
               </div>
             ) : (
-              <div className="flex flex-col gap-2 sm:gap-4">
+              <div className="flex flex-col gap-3 sm:gap-4">
                 {/* Full Name Field */}
                 <div>
                   <label className="text-sm font-medium sm:text-md text-gray-700 mb-2">
@@ -431,7 +436,7 @@ const AuthPage = ({ isLogin }) => {
                       value={signupForm.fullName}
                       onChange={handleSignupChange}
                       placeholder="Enter your full name"
-                      className="w-full px-2 py-1 sm:px-4 sm:py-2 text-md sm:text-lg border border-gray-300 rounded-sm sm:rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                      className="w-full p-2 sm:px-4 sm:py-2 text-md sm:text-lg border border-gray-300 rounded-sm sm:rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                       required
                     />
                   </div>
@@ -452,7 +457,7 @@ const AuthPage = ({ isLogin }) => {
                       value={signupForm.email}
                       onChange={handleSignupChange}
                       placeholder="Enter your email"
-                      className="w-full px-2 py-1 sm:px-4 sm:py-2 text-md sm:text-lg  border border-gray-300 rounded-sm sm:rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                      className="w-full p-2 sm:px-4 sm:py-2 text-md sm:text-lg  border border-gray-300 rounded-sm sm:rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                       required
                     />
                   </div>
@@ -473,7 +478,7 @@ const AuthPage = ({ isLogin }) => {
                       value={signupForm.password}
                       onChange={handleSignupChange}
                       placeholder="Create a password"
-                      className="w-full pl-2 pr-8 py-1 sm:px-4 sm:py-2 text-md sm:text-lg  border border-gray-300 rounded-sm sm:rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                      className="w-full pl-2 pr-8 py-2 sm:px-4 sm:py-2 text-md sm:text-lg  border border-gray-300 rounded-sm sm:rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                       required
                     />
                     <button
@@ -505,7 +510,7 @@ const AuthPage = ({ isLogin }) => {
                       value={signupForm.confirmPassword}
                       onChange={handleSignupChange}
                       placeholder="Confirm your password"
-                      className="w-full pl-2 pr-8 py-1 sm:px-4 sm:py-2 text-md sm:text-lg  border border-gray-300 rounded-sm sm:rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                      className="w-full pl-2 pr-8 py-2 sm:px-4 sm:py-2 text-md sm:text-lg  border border-gray-300 rounded-sm sm:rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                       required
                     />
                     <button
