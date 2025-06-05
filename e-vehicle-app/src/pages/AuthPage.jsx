@@ -257,7 +257,7 @@ const AuthPage = ({ isLogin }) => {
       resetData();
       setSubmitError("");
       addLocalStorage(token, role);
-      role == "User" ? navigate("/contact") : navigate("/adminpanel");
+      role == "User" ? navigate("/dashboard") : navigate("/adminpanel");
     } catch (err) {
       if (err.response) {
         const { data } = err.response;
@@ -300,7 +300,7 @@ const AuthPage = ({ isLogin }) => {
       const token = response.data.token;
       addLocalStorage(token, "User");
       resetData();
-      navigate("/contact");
+      navigate("/dashboard");
     } catch (err) {
       if (err.response) {
         const { data } = err.response;

@@ -1,9 +1,194 @@
-function Dashboard(){
-    return (
-        <div>
-            <p>Dashboard</p>
+import React, { useState } from "react";
+import { Home, User, Calendar, Settings, Menu, X } from "lucide-react";
+import Map from "./Map";
+const Router = ({ children }) => children;
+const Routes = ({ children }) => children;
+const Route = ({ element }) => element;
+
+const useNavigate = () => (path) => console.log(`Navigating to: ${path}`);
+
+const ProfilePage = () => (
+  <div className="p-6">
+    <h1 className="text-3xl font-bold text-gray-800 mb-4">Profile</h1>
+    <p className="text-gray-600">
+      Manage your profile information and preferences here.
+    </p>
+  </div>
+);
+
+const BookingsPage = () => (
+  <div className="p-6">
+    <h1 className="text-3xl font-bold text-gray-800 mb-4">Bookings</h1>
+    <p className="text-gray-600">
+      View and manage your bookings and reservations.
+    </p>
+  </div>
+);
+
+const SettingsPage = () => (
+  <div className="p-6">
+    <h1 className="text-3xl font-bold text-gray-800 mb-4">Settings</h1>
+    <p className="text-gray-600">
+      Configure your application settings and permissions.
+    </p>
+  </div>
+);
+
+const Sidebar = ({ isOpen, toggleSidebar, currentPage, setCurrentPage }) => {
+  const navigate = useNavigate();
+
+  const menuItems = [
+    { id: "home", label: "Map", icon: Home, component: Map },
+    { id: "profile", label: "Profile", icon: User, component: ProfilePage },
+    {
+      id: "bookings",
+      label: "Bookings",
+      icon: Calendar,
+      component: BookingsPage,
+    },
+    {
+      id: "settings",
+      label: "Settings",
+      icon: Settings,
+      component: SettingsPage,
+    },
+  ];
+
+  const handleNavigation = (item) => {
+    setCurrentPage(item);
+    navigate(`/${item.id}`);
+    if (window.innerWidth < 768) {
+      toggleSidebar();
+    }
+  };
+
+  return (
+    <>
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-opacity-50 z-40 md:hidden"
+          onClick={toggleSidebar}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div
+        className={`
+        fixed top-0 left-0 h-full w-64 bg-green-100 shadow-lg transform transition-transform duration-300 ease-in-out z-50
+        ${isOpen ? "translate-x-0" : "-translate-x-full"}
+        md:translate-x-0 md:static md:shadow-none
+      `}
+      >
+        {/* Sidebar Header */}
+        <div className="flex items-center justify-between p-4 ">
+          <h1
+            className={`text-xl sm:text-2xl font-bold text-green-500`}
+          >
+            <span>ChargeWay</span>
+          </h1>
+          <button
+            onClick={toggleSidebar}
+            className="p-2 rounded-lg hover:bg-gray-50 md:hidden"
+          >
+            <X size={20} />
+          </button>
         </div>
-    );
-}
+
+        {/* Navigation Menu */}
+        <nav className="mt-4">
+          <ul className="space-y-2 px-4">
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = currentPage.id === item.id;
+
+              return (
+                <li className="" key={item.id}>
+                  <button
+                    onClick={() => handleNavigation(item)}
+                    className={`
+                      w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors duration-200
+                      ${
+                        isActive
+                          ? "bg-white text-green-700"
+                          : "text-green-700 hover:bg-white"
+                      }
+                    `}
+                  >
+                    <Icon size={20} />
+                    <span className="font-medium">{item.label}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+      </div>
+    </>
+  );
+};
+
+const Dashboard = () => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState({
+    id: "home",
+    label: "Map",
+    icon: Home,
+    component: Map,
+  });
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const CurrentPageComponent = currentPage.component;
+
+  return (
+    <Router>
+      <div className="flex h-screen bg-gray-50">
+        {/* Sidebar */}
+        <Sidebar
+          isOpen={isSidebarOpen}
+          toggleSidebar={toggleSidebar}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+        />
+
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col md:ml-0">
+          {/* Header */}
+          <header className="bg-white shadow-sm border-b border-gray-50 px-4 py-3 md:px-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                {/* Mobile hamburger button */}
+                <button
+                  onClick={toggleSidebar}
+                  className="p-2 rounded-lg hover:bg-gray-100 md:hidden"
+                >
+                  <Menu size={24} />
+                </button>
+                <h1 className="text-xl font-semibold text-gray-800">
+                  {currentPage.label}
+                </h1>
+              </div>
+
+              {/* Header actions */}
+              <div className="flex items-center space-x-2">
+                <button className="p-2 rounded-lg hover:bg-gray-100">
+                  <User size={20} />
+                </button>
+              </div>
+            </div>
+          </header>
+
+          <main className="flex-1 overflow-y-auto">
+            <Routes>
+              <Route path="/" element={<CurrentPageComponent />} />
+            </Routes>
+          </main>
+        </div>
+      </div>
+    </Router>
+  );
+};
 
 export default Dashboard;
