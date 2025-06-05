@@ -6,12 +6,11 @@ import AdminPanel from "./pages/AdminPanel";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./pages/ProtectedRoute";
 import PageNotFound from "./pages/PageNotFound";
-import LocationWatcher from "./pages/temp";
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<LocationWatcher />} />
+      <Route path="/" element={<Homepage />} />
       <Route path="/login" element={<AuthPage isLogin={true} />} />
       <Route path="/register" element={<AuthPage isLogin={false} />} />
       <Route path="/adminpanel" element={<ProtectedRoute isAllowed={['Admin']} ><AdminPanel /></ProtectedRoute>} />
