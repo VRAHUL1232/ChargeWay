@@ -13,10 +13,11 @@ import Spinner from "../components/Spinner";
 
 const LocationAccess = () => {
   const [location, setLocation] = useState({
-    latitude: 20.593683,
-    longitude: 78.962883,
+    latitude: 13.144,
+    longitude: 80.204,
   });
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
   const [loading, setLoading] = useState(false);
   const [permission, setPermission] = useState("prompt");
   const [progress, setProgress] = useState(null);
@@ -26,15 +27,16 @@ const LocationAccess = () => {
   const checkLocationPermission = async () => {
     if (!navigator.permissions) {
       console.warn("Permissions API not supported in this browser.");
-      return;
+      return null;
     }
     try {
       const status = await navigator.permissions.query({ name: "geolocation" });
       console.log("permission", status);
       setPermission(status.state);
+      return status.state;
     } catch (err) {
       console.error("Permission check error:", err);
-      return;
+      return null;
     }
   };
 
@@ -42,38 +44,65 @@ const LocationAccess = () => {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         console.log(position);
+        if (mapRef.current) {
+          mapRef.current.flyTo({
+            center: [position.coords.longitude, position.coords.latitude],
+            zoom: 15,
+            essential: true,
+          });
+        }
+        setSuccess("Granted Location Access Successfully.");
       },
       (error) => {
         console.log("Permission denied or error:", error);
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            setError("Location access denied by user");
+            setPermission("denied");
+            break;
+          case error.POSITION_UNAVAILABLE:
+            setError("Location information is unavailable");
+            break;
+          case error.TIMEOUT:
+            setError("Location request timed out");
+            break;
+          default:
+            setError("An unknown error occurred while retrieving location");
+            break;
+        }
       },
       {
         enableHighAccuracy: true,
-        timeout: 10000,
         maximumAge: 0,
       }
     );
   };
 
   const getCurrentLocation = () => {
-    setLoading(true)
     new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
         reject("Geolocation not supported");
         return;
       }
-
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           const coords = {
             latitude: pos.coords.latitude.toFixed(6),
             longitude: pos.coords.longitude.toFixed(6),
           };
+          if (mapRef.current) {
+            mapRef.current.flyTo({
+              center: [pos.coords.longitude, pos.coords.latitude],
+              zoom: 15,
+              essential: true,
+            });
+          }
           console.log("currentLoc", pos);
           setLocation(coords);
           resolve(coords);
         },
         (err) => {
-          console.log(err);
+          console.log("currentLoc", err);
           reject(err);
         },
         {
@@ -83,7 +112,6 @@ const LocationAccess = () => {
         }
       );
     });
-    setLoading(false)
   };
 
   useEffect(() => {
@@ -114,8 +142,15 @@ const LocationAccess = () => {
   }, []);
 
   useEffect(() => {
-    checkLocationPermission();
-    handleRequest();
+    async function fetchData() {
+      const permissionState = await checkLocationPermission();
+      if (permissionState === "prompt") {
+        handleRequest();
+      } else if (permissionState === "granted") {
+        getCurrentLocation();
+      }
+    }
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -123,7 +158,6 @@ const LocationAccess = () => {
       setProgress(0);
       const start = Date.now();
       const duration = 3000;
-
       const animate = () => {
         const elapsed = Date.now() - start;
         const percentage = (elapsed / duration) * 100;
@@ -135,10 +169,29 @@ const LocationAccess = () => {
           setError(null);
         }
       };
-
       animate();
     }
   }, [error]);
+
+  useEffect(() => {
+    if (success) {
+      setProgress(0);
+      const start = Date.now();
+      const duration = 3000;
+      const animate = () => {
+        const elapsed = Date.now() - start;
+        const percentage = (elapsed / duration) * 100;
+        setProgress(Math.max(0, percentage));
+
+        if (elapsed < duration) {
+          requestAnimationFrame(animate);
+        } else {
+          setSuccess(null);
+        }
+      };
+      animate();
+    }
+  }, [success]);
 
   mapboxgl.accessToken =
     "pk.eyJ1IjoicmFodWx2MTIzMiIsImEiOiJjbWJndXlndXQwMmhnMmxxdzFvNzk1N3B0In0.rtlr088E-pxFoa_kPOF2aA";
@@ -158,6 +211,19 @@ const LocationAccess = () => {
           <h1 className="text-xl font-bold">{error}</h1>
           <div
             className={`absolute bottom-0 left-0 h-1 transition-all duration-[50ms] ease-linear bg-red-500
+            } `}
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      )}
+
+      {success && (
+        <div
+          className={`absolute w-3/4 rounded-2xl p-4 bg-white top-4 left-1/2 transform -translate-x-1/2 z-20 text-green-500 `}
+        >
+          <h1 className="text-xl font-bold">{success}</h1>
+          <div
+            className={`absolute bottom-0 left-0 h-1 transition-all duration-[50ms] ease-linear bg-green-500
             } `}
             style={{ width: `${progress}%` }}
           />
