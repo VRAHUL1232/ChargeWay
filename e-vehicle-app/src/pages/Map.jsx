@@ -1,258 +1,184 @@
-import React, { useState, useEffect } from "react";
-import { MapPin, AlertCircle, CheckCircle, Loader } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import {
+  MapPin,
+  AlertCircle,
+  CheckCircle,
+  Loader,
+  LocateFixed,
+} from "lucide-react";
+import "mapbox-gl/dist/mapbox-gl.css";
+import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
+import Spinner from "../components/Spinner";
 
 const LocationAccess = () => {
-  const [location, setLocation] = useState(null);
+  const [location, setLocation] = useState({
+    latitude: 20.593683,
+    longitude: 78.962883,
+  });
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [permission, setPermission] = useState("prompt");
+  const [progress, setProgress] = useState(null);
+  const mapContainerRef = useRef(null);
+  const mapRef = useRef(null);
 
-  const getCurrentLocation = () => {
-    if (!navigator.geolocation) {
-      setError("Geolocation is not supported by this browser");
+  const checkLocationPermission = async () => {
+    if (!navigator.permissions) {
+      console.warn("Permissions API not supported in this browser.");
       return;
     }
+    try {
+      const status = await navigator.permissions.query({ name: "geolocation" });
+      console.log("permission", status);
+      setPermission(status.state);
+    } catch (err) {
+      console.error("Permission check error:", err);
+      return;
+    }
+  };
 
-    setError(null);
-    setLoading(true);
-    const options = {
-      enableHighAccuracy: true,
-      timeout: 5000,
-      maximumAge: 86400,
-    };
+  const handleRequest = () => {
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        const locationData = {
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-          accuracy: position.coords.accuracy,
-          altitude: position.coords.altitude,
-          altitudeAccuracy: position.coords.altitudeAccuracy,
-          heading: position.coords.heading,
-          speed: position.coords.speed,
-          timestamp: position.timestamp,
-        };
-
-        console.log("locationData", locationData);
-        setLocation(locationData);
-        setLoading(false);
-        setPermission("granted"); // Update permission state
-        console.log("Location obtained:", locationData);
+        console.log(position);
       },
       (error) => {
-        setLoading(false);
-
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            setError("Location access denied by user");
-            setPermission("denied");
-            break;
-          case error.POSITION_UNAVAILABLE:
-            setError("Location information is unavailable");
-            break;
-          case error.TIMEOUT:
-            setError("Location request timed out");
-            break;
-          default:
-            setError("An unknown error occurred while retrieving location");
-            break;
-        }
-        console.error("Geolocation error:", error);
+        console.log("Permission denied or error:", error);
       },
-      options
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
     );
+  };
+
+  const getCurrentLocation = () => {
+    setLoading(true)
+    new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject("Geolocation not supported");
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const coords = {
+            latitude: pos.coords.latitude.toFixed(6),
+            longitude: pos.coords.longitude.toFixed(6),
+          };
+          console.log("currentLoc", pos);
+          setLocation(coords);
+          resolve(coords);
+        },
+        (err) => {
+          console.log(err);
+          reject(err);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0,
+        }
+      );
+    });
+    setLoading(false)
   };
 
   useEffect(() => {
-    if (!navigator.geolocation) {
-      setError("Geolocation is not supported by this browser");
-      return;
-    }
+    if (!mapRef.current) {
+      mapRef.current = new mapboxgl.Map({
+        container: mapContainerRef.current,
+        style: "mapbox://styles/mapbox/streets-v9",
+        projection: "mercator",
+        zoom: 9,
+        center: [location.longitude, location.latitude],
+      });
 
-    if (navigator.permissions) {
-      navigator.permissions
-        .query({ name: "geolocation" })
-        .then((result) => {
-          setPermission(result.state);
-          if (result.state === "granted") {
-            getCurrentLocation();
-          }
+      const map = mapRef.current;
 
-          result.addEventListener("change", () => {
-            setPermission(result.state);
-          });
-        })
-        .catch((err) => {
-          console.warn("Permission query not supported:", err);
-          console.log(
-            "Permission query not supported - Trying to get location"
-          );
-          getCurrentLocation();
-        });
-    } else {
-      console.log("Permissions API not supported - Trying to get location");
-      getCurrentLocation();
+      map.addControl(new mapboxgl.NavigationControl());
+      map.scrollZoom.disable();
+
+      map.on("style.load", () => {
+        map.setFog({});
+      });
     }
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
+    };
   }, []);
 
-  const watchLocation = () => {
-    if (!navigator.geolocation) {
-      setError("Geolocation is not supported by this browser");
-      return null;
+  useEffect(() => {
+    checkLocationPermission();
+    handleRequest();
+  }, []);
+
+  useEffect(() => {
+    if (error) {
+      setProgress(0);
+      const start = Date.now();
+      const duration = 3000;
+
+      const animate = () => {
+        const elapsed = Date.now() - start;
+        const percentage = (elapsed / duration) * 100;
+        setProgress(Math.max(0, percentage));
+
+        if (elapsed < duration) {
+          requestAnimationFrame(animate);
+        } else {
+          setError(null);
+        }
+      };
+
+      animate();
     }
+  }, [error]);
 
-    const options = {
-      enableHighAccuracy: true,
-      timeout: 5000,
-      maximumAge: 0,
-    };
-
-    const watchId = navigator.geolocation.watchPosition(
-      (position) => {
-        const locationData = {
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-          accuracy: position.coords.accuracy,
-          timestamp: position.timestamp,
-        };
-        setLocation(locationData);
-        console.log("Location updated:", locationData);
-      },
-      (error) => {
-        console.error("Watch position error:", error);
-        setError(`Watch error: ${error.message}`);
-      },
-      options
-    );
-
-    return watchId;
-  };
-
-  const clearLocation = () => {
-    setLocation(null);
-    setError(null);
-  };
-
-  const getPermissionIcon = () => {
-    switch (permission) {
-      case "granted":
-        return <CheckCircle className="w-5 h-5 text-green-500" />;
-      case "denied":
-        return <AlertCircle className="w-5 h-5 text-red-500" />;
-      default:
-        return <MapPin className="w-5 h-5 text-gray-500" />;
-    }
-  };
-
-  const formatCoordinate = (coord) => {
-    return coord ? coord.toFixed(6) : "N/A";
-  };
+  mapboxgl.accessToken =
+    "pk.eyJ1IjoicmFodWx2MTIzMiIsImEiOiJjbWJndXlndXQwMmhnMmxxdzFvNzk1N3B0In0.rtlr088E-pxFoa_kPOF2aA";
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-lg">
-      <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">
-          Location Access
-        </h2>
-        <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
-          {getPermissionIcon()}
-          <span>Permission: {permission}</span>
+    <div
+      className={`relative w-full h-[100dvh] sm:h-full font-sans ${
+        loading && `opacity-35`
+      }`}
+    >
+      <div ref={mapContainerRef} className="w-full h-full" />
+
+      {error && (
+        <div
+          className={`absolute w-3/4 rounded-2xl p-4 bg-white top-4 left-1/2 transform -translate-x-1/2 z-20 text-red-500 `}
+        >
+          <h1 className="text-xl font-bold">{error}</h1>
+          <div
+            className={`absolute bottom-0 left-0 h-1 transition-all duration-[50ms] ease-linear bg-red-500
+            } `}
+            style={{ width: `${progress}%` }}
+          />
         </div>
+      )}
+
+      <div className="absolute w-3/4 top-4 left-1/2 transform -translate-x-1/2 z-10">
+        <input
+          type="text"
+          placeholder="Search location..."
+          className="w-full px-4 py-2 rounded-lg shadow border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+        />
       </div>
 
-      <div className="space-y-4">
-        <div className="flex gap-2">
-          <button
-            onClick={getCurrentLocation}
-            disabled={loading || permission === "denied"}
-            className="flex-1 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
-          >
-            {permission!=='prompt' && loading ? (
-              <>
-                <Loader className="w-4 h-4 animate-spin" />
-                Getting Location...
-              </>
-            ) : (
-              <>
-                <MapPin className="w-4 h-4" />
-                Get Location
-              </>
-            )}
-          </button>
-
-          <button
-            onClick={clearLocation}
-            className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors"
-          >
-            Clear
-          </button>
-        </div>
-
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-            <div className="flex items-center gap-2 text-red-700">
-              <AlertCircle className="w-4 h-4" />
-              <span className="text-sm font-medium">Error</span>
-            </div>
-            <p className="text-red-600 text-sm mt-1">{error}</p>
-          </div>
-        )}
-
-        {location && (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-            <div className="flex items-center gap-2 text-green-700 mb-3">
-              <CheckCircle className="w-4 h-4" />
-              <span className="font-medium">Location Retrieved</span>
-            </div>
-
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Latitude:</span>
-                <span className="font-mono">
-                  {formatCoordinate(location.latitude)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Longitude:</span>
-                <span className="font-mono">
-                  {formatCoordinate(location.longitude)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Accuracy:</span>
-                <span>
-                  {location.accuracy
-                    ? `${Math.round(location.accuracy)}m`
-                    : "N/A"}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Retrieved:</span>
-                <span>{new Date(location.timestamp).toLocaleTimeString()}</span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {permission === "denied" && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-            <p className="text-yellow-800 text-sm">
-              Location access is blocked. Please enable location permissions in
-              your browser settings and refresh the page.
-            </p>
-          </div>
-        )}
-      </div>
-
-      <div className="mt-6 p-3 bg-gray-50 rounded-lg">
-        <h3 className="font-medium text-gray-800 mb-2">Usage in Code:</h3>
-        <code className="text-xs text-gray-600 block">
-          {location
-            ? `const userLocation = {\n  lat: ${formatCoordinate(
-                location.latitude
-              )},\n  lng: ${formatCoordinate(location.longitude)}\n};`
-            : "Location will appear here once retrieved"}
-        </code>
+      <div className="absolute right-8 top-5/6 transform -translate-y-5/6 md:right-12 z-10">
+        <button
+          onClick={getCurrentLocation}
+          className="bg-white p-3 md:p-5 rounded-2xl shadow-md transition"
+        >
+          <LocateFixed className="w-6 h-6 md:w-8 md:h-8 text-blue-700" />
+        </button>
       </div>
     </div>
   );

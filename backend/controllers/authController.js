@@ -22,7 +22,7 @@ const login = async (req, res) => {
       return res.status(401).json({ error: "Password is Incorrect." });
     }
     const token = jwt.sign({ email }, process.env.SECRETKEY, {
-      expiresIn: "1h",
+      expiresIn: "1d",
     });
     return res.status(201).json({ token: token });
   } catch (err) {
@@ -41,7 +41,7 @@ const register = async (req, res) => {
     }
     await query.createUser(fullName, email, hashed);
     const token = jwt.sign({ email }, process.env.SECRETKEY, {
-      expiresIn: "1h",
+      expiresIn: "1d",
     });
     return res.status(201).json({ token: token, message: "User created successfully" });
   } catch (err) {

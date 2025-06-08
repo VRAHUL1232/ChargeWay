@@ -6,6 +6,7 @@ import AdminPanel from "./pages/AdminPanel";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./pages/ProtectedRoute";
 import PageNotFound from "./pages/PageNotFound";
+import MapboxComponent from "./components/MapComponent";
 
 function App() {
   return (

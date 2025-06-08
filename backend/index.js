@@ -5,9 +5,12 @@ const app = express()
 
 app.use(express.json())
 
-app.use(cors());
+app.use(cors({
+  origin: '*',
+}));
 
 const PORT = process.env.PORT || 3000
+const HOSTIP = process.env.HOSTIP
 const query = require('./models/authQuery')
 const authRoute = require('./routes/authRoute')
 
@@ -19,6 +22,6 @@ app.get('/',(req,res)=>{
 
 app.use('/',authRoute);
 
-app.listen(PORT ,()=>{
+app.listen(PORT, HOSTIP ,()=>{
     console.log(`Server is running in http://localhost:${PORT}`);
 })

@@ -20,6 +20,8 @@ const AuthPage = ({ isLogin }) => {
   const [submitError, setSubmitError] = useState("");
   const navigate = useNavigate();
 
+  const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST
+
   const [loginForm, setLoginForm] = useState({
     email: "",
     password: "",
@@ -245,7 +247,7 @@ const AuthPage = ({ isLogin }) => {
       setIsLoading(true);
       const { email, password, role } = loginForm;
       console.log(email, password, role);
-      const response = await axios.post(`http://localhost:3000/login`, {
+      const response = await axios.post(`${VITE_LOCALHOST}/login`, {
         email,
         password,
         role,

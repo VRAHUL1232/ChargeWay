@@ -5,7 +5,7 @@ import { Underline } from "lucide-react";
 import UnAuthorisedPage from "./UnAuthorisedPage";
 
 function ProtectedRoute({ children, isAllowed }) {
-  const [isAuth, setIsAuth] = useState(null); 
+  const [isAuth, setIsAuth] = useState(true); 
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -37,7 +37,7 @@ function ProtectedRoute({ children, isAllowed }) {
 
   return (
     <div>
-      {(!isAuth || !roleAllowed) ? <UnAuthorisedPage/> : children}
+      {(isAuth && roleAllowed) ? children : <UnAuthorisedPage/>}
     </div>
   );
 }

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Home, User, Calendar, Settings, Menu, X } from "lucide-react";
-import Map from "./Map";
+import LocationAccess from "./Map";
+
+
 const Router = ({ children }) => children;
 const Routes = ({ children }) => children;
 const Route = ({ element }) => element;
@@ -38,7 +40,7 @@ const Sidebar = ({ isOpen, toggleSidebar, currentPage, setCurrentPage }) => {
   const navigate = useNavigate();
 
   const menuItems = [
-    { id: "home", label: "Map", icon: Home, component: Map },
+    { id: "locationAccess", label: "Location", icon: Home, component: LocationAccess },
     { id: "profile", label: "Profile", icon: User, component: ProfilePage },
     {
       id: "bookings",
@@ -66,20 +68,19 @@ const Sidebar = ({ isOpen, toggleSidebar, currentPage, setCurrentPage }) => {
     <>
       {isOpen && (
         <div
-          className="fixed inset-0 bg-opacity-50 z-40 md:hidden"
+          className="fixed inset-0 bg-opacity-50 z-40 sm:hidden"
           onClick={toggleSidebar}
         />
       )}
 
-      {/* Sidebar */}
       <div
         className={`
-        fixed top-0 left-0 h-full w-64 bg-green-100 shadow-lg transform transition-transform duration-300 ease-in-out z-50
+        fixed top-0 left-0 h-lvh w-64 bg-green-100 shadow-lg transform transition-transform duration-300 ease-in-out z-50
         ${isOpen ? "translate-x-0" : "-translate-x-full"}
         md:translate-x-0 md:static md:shadow-none
       `}
       >
-        {/* Sidebar Header */}
+
         <div className="flex items-center justify-between p-4 ">
           <h1
             className={`text-xl sm:text-2xl font-bold text-green-500`}
@@ -94,7 +95,7 @@ const Sidebar = ({ isOpen, toggleSidebar, currentPage, setCurrentPage }) => {
           </button>
         </div>
 
-        {/* Navigation Menu */}
+
         <nav className="mt-4">
           <ul className="space-y-2 px-4">
             {menuItems.map((item) => {
@@ -130,10 +131,10 @@ const Sidebar = ({ isOpen, toggleSidebar, currentPage, setCurrentPage }) => {
 const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState({
-    id: "home",
-    label: "Map",
+    id: "locationAccess",
+    label: "LocationAccess",
     icon: Home,
-    component: Map,
+    component: LocationAccess,
   });
 
   const toggleSidebar = () => {
@@ -145,7 +146,6 @@ const Dashboard = () => {
   return (
     <Router>
       <div className="flex h-screen bg-gray-50">
-        {/* Sidebar */}
         <Sidebar
           isOpen={isSidebarOpen}
           toggleSidebar={toggleSidebar}
@@ -153,33 +153,22 @@ const Dashboard = () => {
           setCurrentPage={setCurrentPage}
         />
 
-        {/* Main Content */}
         <div className="flex-1 flex flex-col md:ml-0">
-          {/* Header */}
-          <header className="bg-white shadow-sm border-b border-gray-50 px-4 py-3 md:px-6">
+          <header className="bg-green-500 shadow-sm px-4 py-3 md:px-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
-                {/* Mobile hamburger button */}
                 <button
                   onClick={toggleSidebar}
-                  className="p-2 rounded-lg hover:bg-gray-100 md:hidden"
+                  className="p-2 rounded-lg md:hidden"
                 >
                   <Menu size={24} />
                 </button>
-                <h1 className="text-xl font-semibold text-gray-800">
+                <h1 className="text-lg font-bold text-white">
                   {currentPage.label}
                 </h1>
               </div>
-
-              {/* Header actions */}
-              <div className="flex items-center space-x-2">
-                <button className="p-2 rounded-lg hover:bg-gray-100">
-                  <User size={20} />
-                </button>
-              </div>
             </div>
           </header>
-
           <main className="flex-1 overflow-y-auto">
             <Routes>
               <Route path="/" element={<CurrentPageComponent />} />
