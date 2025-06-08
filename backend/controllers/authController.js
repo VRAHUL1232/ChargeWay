@@ -12,12 +12,12 @@ app.use(express.json());
 const login = async (req, res) => {
   try {
     const { email, password, role } = req.body;
-    console.log(email, password, role);
     const user = await query.findUser(email, role);
-    if (!user || user.length != 1) {
+    console.log(user)
+    if (!user) {
       return res.status(404).json({ error: `${role} Not Found!` });
     }
-    const userPassword = user[0].PASSWORD;
+    const userPassword = user.password;
     if (!(await bcrypt.compare(password, userPassword))) {
       return res.status(401).json({ error: "Password is Incorrect." });
     }
@@ -33,13 +33,13 @@ const login = async (req, res) => {
 
 const register = async (req, res) => {
   try {
-    const { fullName, email, password } = req.body;
+    const { username, email, password } = req.body;
     const hashed = await bcrypt.hash(password, 10);
     const user = await query.findUser(email, "User");
-    if (user && user.length != 0) {
+    if (user) {
       return res.status(409).json({ error: "User already exists." });
     }
-    await query.createUser(fullName, email, hashed);
+    await query.createUser(username, email, hashed);
     const token = jwt.sign({ email }, process.env.SECRETKEY, {
       expiresIn: "1d",
     });

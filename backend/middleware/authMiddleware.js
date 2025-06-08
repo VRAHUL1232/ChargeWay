@@ -39,7 +39,7 @@ const isVerified = async (req, res) => {
       console.log(user);
       const newUser = await findUser(user.email,role);
       console.log(newUser);
-      if (!newUser || newUser.length!=1){
+      if (!newUser){
         return res.status(401).json({ message: "User Not Found!" });
       }
       return res.status(200).json({ message: "Verified", isAuth: true }); 
