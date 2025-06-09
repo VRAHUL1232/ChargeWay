@@ -29,7 +29,7 @@ const AuthPage = ({ isLogin }) => {
   });
 
   const [signupForm, setSignupForm] = useState({
-    fullName: "",
+    username: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -41,7 +41,7 @@ const AuthPage = ({ isLogin }) => {
       role: "User",
     });
     setSignupForm({
-      fullName: "",
+      username: "",
       email: "",
       password: "",
       confirmPassword: "",
@@ -132,13 +132,13 @@ const AuthPage = ({ isLogin }) => {
   );
 
   const validateSignInForm = () => {
-    const { fullName, email, password, confirmPassword } = signupForm;
-    const fullNameMessage = valdateName(fullName);
+    const { username, email, password, confirmPassword } = signupForm;
+    const usernameMessage = valdateName(username);
     const emailMessge = validateEmail(email);
     const passwordMessage = validatePassword(password);
     const confirmMessage = validatePassword(confirmPassword);
-    if (fullName.length == 0 || fullNameMessage.length > 0) {
-      setNameError(fullName.length == 0 ? "Name is empty." : fullNameMessage);
+    if (username.length == 0 || usernameMessage.length > 0) {
+      setNameError(username.length == 0 ? "Name is empty." : usernameMessage);
       return false;
     } else {
       setNameError("");
@@ -169,12 +169,12 @@ const AuthPage = ({ isLogin }) => {
   };
 
   const isValidSignUp = () => {
-    const { fullName, email, password, confirmPassword } = signupForm;
-    const fullNameMessage = valdateName(fullName);
+    const { username, email, password, confirmPassword } = signupForm;
+    const usernameMessage = valdateName(username);
     const emailMessge = validateEmail(email);
     const passwordMessage = validatePassword(password);
     const confirmMessage = validatePassword(confirmPassword);
-    if (fullName.length == 0 || fullNameMessage.length > 0) {
+    if (username.length == 0 || usernameMessage.length > 0) {
       return false;
     }
     if (email.length == 0 || emailMessge.length > 0) {
@@ -192,7 +192,7 @@ const AuthPage = ({ isLogin }) => {
   const isSignInValid = useMemo(
     () => isValidSignUp(),
     [
-      signupForm.fullName,
+      signupForm.username,
       signupForm.email,
       signupForm.password,
       signupForm.confirmPassword,
@@ -227,7 +227,7 @@ const AuthPage = ({ isLogin }) => {
     } else if (e.target.name == "confirmPassword") {
       const errorMessage = validatePassword(e.target.value);
       setConfirmPasswordError(errorMessage);
-    } else if (e.target.name == "fullName") {
+    } else if (e.target.name == "username") {
       const errorMessage = valdateName(e.target.value);
       setNameError(errorMessage);
     }
@@ -288,9 +288,9 @@ const AuthPage = ({ isLogin }) => {
       }
       setIsLoading(true);
 
-      const { fullName, email, password } = signupForm;
-      const response = await axios.post(`http://localhost:3000/register`, {
-        fullName,
+      const { username, email, password } = signupForm;
+      const response = await axios.post(`${VITE_LOCALHOST}/register`, {
+        username,
         email,
         password,
       });
@@ -434,8 +434,8 @@ const AuthPage = ({ isLogin }) => {
                   <div className="relative">
                     <input
                       type="text"
-                      name="fullName"
-                      value={signupForm.fullName}
+                      name="username"
+                      value={signupForm.username}
                       onChange={handleSignupChange}
                       placeholder="Enter your full name"
                       className="w-full p-2 sm:px-4 sm:py-2 text-md sm:text-lg border border-gray-300 rounded-sm sm:rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"

@@ -11,9 +11,14 @@ const authenticate = async (req, res, next) => {
     const token = authHeader?.split(" ")[1];
     if (!token) return res.status(401).send("Token missing");
 
-    jwt.verify(token, process.env.SECRETKEY, (err, user) => {
-      if (err) return res.status(403).send("Invalid token");
-      req.user = user;
+    jwt.verify(token, process.env.SECRETKEY, async (err, user) => {
+      if (err) {
+        return res.status(401).json({ message: "Unauthorized token" });
+      }
+      const newUser = await findUser(user.email,role);
+      if (!newUser){
+        return res.status(401).json({ message: "User Not Found!" });
+      }
       next();
     });
   } catch (err) {

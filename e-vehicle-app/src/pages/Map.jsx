@@ -193,8 +193,7 @@ const LocationAccess = () => {
     }
   }, [success]);
 
-  mapboxgl.accessToken =
-    "pk.eyJ1IjoicmFodWx2MTIzMiIsImEiOiJjbWJndXlndXQwMmhnMmxxdzFvNzk1N3B0In0.rtlr088E-pxFoa_kPOF2aA";
+  mapboxgl.accessToken = import.meta.env.VITE_API_TOKEN;
 
   return (
     <div

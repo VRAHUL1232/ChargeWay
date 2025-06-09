@@ -4,7 +4,7 @@ const pool = require("../config/db");
 const createTables = async () => {
   await pool
     .query(
-      "CREATE TABLE IF NOT EXISTS AUTH(USERNAME VARCHAR(255) NOT NULL, PASSWORD VARCHAR(255) NOT NULL, EMAIL VARCHAR(255) NOT NULL PRIMARY KEY, ROLE VARCHAR(255) NOT NULL);"
+      "CREATE TABLE IF NOT EXISTS auth(id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, username VARCHAR(255) NOT NULL, password VARCHAR(255) NOT NULL, email VARCHAR(255) NOT NULL UNIQUE, role VARCHAR(255) NOT NULL);"
     )
     .then(() => console.log("Table created Successfully"))
     .catch((err) => console.log("Error occured ,", err));

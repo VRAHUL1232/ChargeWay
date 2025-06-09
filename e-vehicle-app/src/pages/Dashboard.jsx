@@ -161,7 +161,7 @@ const Dashboard = () => {
                   onClick={toggleSidebar}
                   className="p-2 rounded-lg md:hidden"
                 >
-                  <Menu size={24} />
+                  <Menu size={24} className="text-white font-bold" />
                 </button>
                 <h1 className="text-lg font-bold text-white">
                   {currentPage.label}
