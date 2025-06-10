@@ -11,7 +11,7 @@ app.use(
   })
 );
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 const HOSTIP = process.env.HOSTIP;
 const query = require("./models/authQuery");
 const authRoute = require("./routes/authRoute");
