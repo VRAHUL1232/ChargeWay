@@ -2,8 +2,6 @@ import React, { useMemo, useState } from "react";
 import { Eye, EyeOff, Mail, Lock, User, Phone } from "lucide-react";
 import Header2 from "../components/Header2";
 import Header4 from "../components/Header4";
-import Header3 from "../components/Header3";
-import SecondaryButton from "../components/Secondarybutton";
 import PrimaryButton from "../components/PrimaryButton";
 import Spinner from "../components/Spinner";
 import axios from "axios";

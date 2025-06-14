@@ -7,6 +7,7 @@ import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./pages/ProtectedRoute";
 import PageNotFound from "./pages/PageNotFound";
 import MapboxComponent from "./components/MapComponent";
+import { UserLocationProvider } from "./context/userLocation";
 
 function App() {
   return (
@@ -14,9 +15,30 @@ function App() {
       <Route path="/" element={<Homepage />} />
       <Route path="/login" element={<AuthPage isLogin={true} />} />
       <Route path="/register" element={<AuthPage isLogin={false} />} />
-      <Route path="/adminpanel" element={<ProtectedRoute isAllowed={['Admin']} ><AdminPanel /></ProtectedRoute>} />
-      <Route path="/dashboard" element={<ProtectedRoute isAllowed={['User', 'Admin']} ><Dashboard /></ProtectedRoute>} />
-      <Route path="/contact" element={<ProtectedRoute isAllowed={['User', 'Admin']}><Contact /></ProtectedRoute>} />
+      <Route
+        path="/adminpanel"
+        element={
+          <ProtectedRoute isAllowed={["Admin"]}>
+            <AdminPanel />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dashboard"
+        element={
+            <ProtectedRoute isAllowed={["User"]}>
+              <UserLocationProvider><Dashboard /></UserLocationProvider>
+            </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/contact"
+        element={
+          <ProtectedRoute isAllowed={["User"]}>
+            <Contact />
+          </ProtectedRoute>
+        }
+      />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

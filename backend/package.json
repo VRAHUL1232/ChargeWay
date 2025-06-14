@@ -20,6 +20,7 @@
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.14.1",
     "pg": "^8.16.0",
+    "postgres": "^3.4.7",
     "router": "^2.2.0"
   },
   "devDependencies": {
