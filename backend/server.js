@@ -25,5 +25,7 @@ app.get("/", (req, res) => {
 app.use("/", authRoute);
 
 app.listen(PORT, () => {
-  console.log(`Server is running in http://localhost:${PORT}`);
+  console.log(`Server is running in http://localhost:/api/${PORT}`);
 });
+
+module.exports = app
