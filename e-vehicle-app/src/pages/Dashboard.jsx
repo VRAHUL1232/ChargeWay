@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Home, User, Calendar, Settings, Menu, X } from "lucide-react";
 import LocationAccess from "./Map";
-
+import axios from "axios";
+import { StationLocationContext } from "../context/stationLocation";
+import Spinner from "../components/Spinner";
 
 const Router = ({ children }) => children;
 const Routes = ({ children }) => children;
@@ -40,7 +42,12 @@ const Sidebar = ({ isOpen, toggleSidebar, currentPage, setCurrentPage }) => {
   const navigate = useNavigate();
 
   const menuItems = [
-    { id: "locationAccess", label: "Location", icon: Home, component: LocationAccess },
+    {
+      id: "locationAccess",
+      label: "Location",
+      icon: Home,
+      component: LocationAccess,
+    },
     { id: "profile", label: "Profile", icon: User, component: ProfilePage },
     {
       id: "bookings",
@@ -80,11 +87,8 @@ const Sidebar = ({ isOpen, toggleSidebar, currentPage, setCurrentPage }) => {
         md:translate-x-0 md:static md:shadow-none
       `}
       >
-
         <div className="flex items-center justify-between p-4 ">
-          <h1
-            className={`text-xl sm:text-2xl font-bold text-green-500`}
-          >
+          <h1 className={`text-xl sm:text-2xl font-bold text-green-500`}>
             <span>ChargeWay</span>
           </h1>
           <button
@@ -94,7 +98,6 @@ const Sidebar = ({ isOpen, toggleSidebar, currentPage, setCurrentPage }) => {
             <X size={20} />
           </button>
         </div>
-
 
         <nav className="mt-4">
           <ul className="space-y-2 px-4">
@@ -136,6 +139,22 @@ const Dashboard = () => {
     icon: Home,
     component: LocationAccess,
   });
+  const [loading, setLoading] = useState(false);
+  const { stationData, UpdateStationData } = useContext(StationLocationContext);
+  const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST;
+  useEffect(() => {
+    const responseData = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get(`${VITE_LOCALHOST}/station`);
+        UpdateStationData(response.data);
+      } catch (err) {
+        console.log(err);
+      }
+      setLoading(false);
+    };
+    responseData();
+  }, []);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -145,36 +164,44 @@ const Dashboard = () => {
 
   return (
     <Router>
-      <div className="flex h-screen bg-gray-50">
-        <Sidebar
-          isOpen={isSidebarOpen}
-          toggleSidebar={toggleSidebar}
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-        />
+      <div className="">
+        {loading ? (
+          <div className="h-dvh flex flex-col justify-center items-center">
+            <Spinner />
+          </div>
+        ) : (
+          <div className="flex h-screen bg-gray-50">
+            <Sidebar
+              isOpen={isSidebarOpen}
+              toggleSidebar={toggleSidebar}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+            />
 
-        <div className="flex-1 flex flex-col md:ml-0">
-          <header className="bg-green-500 shadow-sm px-4 py-3 md:px-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <button
-                  onClick={toggleSidebar}
-                  className="p-2 rounded-lg md:hidden"
-                >
-                  <Menu size={24} className="text-white font-bold" />
-                </button>
-                <h1 className="text-lg font-bold text-white">
-                  {currentPage.label}
-                </h1>
-              </div>
+            <div className="flex-1 flex flex-col md:ml-0">
+              <header className="bg-green-500 shadow-sm px-4 py-3 md:px-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <button
+                      onClick={toggleSidebar}
+                      className="p-2 rounded-lg md:hidden"
+                    >
+                      <Menu size={24} className="text-white font-bold" />
+                    </button>
+                    <h1 className="text-lg font-bold text-white">
+                      {currentPage.label}
+                    </h1>
+                  </div>
+                </div>
+              </header>
+              <main className="flex-1 overflow-y-auto">
+                <Routes>
+                  <Route path="/" element={<CurrentPageComponent />} />
+                </Routes>
+              </main>
             </div>
-          </header>
-          <main className="flex-1 overflow-y-auto">
-            <Routes>
-              <Route path="/" element={<CurrentPageComponent />} />
-            </Routes>
-          </main>
-        </div>
+          </div>
+        )}
       </div>
     </Router>
   );

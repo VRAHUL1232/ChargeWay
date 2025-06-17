@@ -1273,13 +1273,13 @@ const dummyplaces = [
   },
 ];
 
-const newval = dummyplaces.map((place) => {
+const stationData = dummyplaces.map((place) => {
   const slotValue = Math.floor(Math.random() * (4 - 2 + 1)) + 2;
   const val1 = Math.floor(Math.random() * (50 - 20 + 1)) + 20;
   const val2 = Math.floor(Math.random() * (40 - 15 + 1)) + 15;
   const val3 = Math.floor(Math.random() * (60 - 30 + 1)) + 30;
   const val4 = Math.floor(Math.random() * (40 - 25 + 1)) + 25;
-  
+
   const newdata = {
     name: place.name,
     address: place.address,
@@ -1291,6 +1291,7 @@ const newval = dummyplaces.map((place) => {
     dcType2: place.ccs2,
     powerRating: place.powerRating,
     review: place.reviewRating,
+    phone_number: "+917305882025",
     acsource: place.acsource,
     dcsource: place.dcsource,
     slots: slotValue,
@@ -1298,9 +1299,62 @@ const newval = dummyplaces.map((place) => {
     acType2Cost: val2,
     dcType1Cost: val3,
     dcType2Cost: val4,
-    timeInterval: [[510,690],[810,990],[1110,1290]],
-  }
-   return newdata;
+    timeInterval: [
+      [510, 690],
+      [810, 990],
+      [1110, 1290],
+    ],
+  };
+  return newdata;
 });
 
+const pool = require("./config/db"); 
 
+const insertStations = async (req, res) => {
+  try {
+    const values = await stationData.map(
+      (data) => [
+        data.name,
+        data.address,
+        data.latitude,
+        data.longitude,
+        data.acType1,
+        data.acType2,
+        data.dcType1,
+        data.dcType2,
+        data.powerRating,
+        data.review,
+        data.phone_number,
+        data.acsource,
+        data.dcsource,
+        2
+      ]
+    );
+
+    const query = `INSERT INTO station (name,
+        address,
+        lat,
+        lng,
+        ac1,
+        ac2,
+        dc1,
+        dc2,
+        power,
+        review,
+        phone_number,
+        ac_type,
+        dc_type,
+        u_id
+        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`;
+
+    values.map(async (data) => {
+        console.log("data", data)
+        const result = await pool.query(query, data);
+    })
+    console.log("success");
+  } catch (err) {
+    console.error("Insert error:", err);
+  }
+};
+
+insertStations();

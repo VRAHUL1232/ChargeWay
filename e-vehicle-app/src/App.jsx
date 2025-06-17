@@ -8,6 +8,7 @@ import ProtectedRoute from "./pages/ProtectedRoute";
 import PageNotFound from "./pages/PageNotFound";
 import MapboxComponent from "./components/MapComponent";
 import { UserLocationProvider } from "./context/userLocation";
+import { StationLocationProvider } from "./context/stationLocation";
 
 function App() {
   return (
@@ -26,9 +27,13 @@ function App() {
       <Route
         path="/dashboard"
         element={
-            <ProtectedRoute isAllowed={["User"]}>
-              <UserLocationProvider><Dashboard /></UserLocationProvider>
-            </ProtectedRoute>
+          <ProtectedRoute isAllowed={["User"]}>
+            <UserLocationProvider>
+              <StationLocationProvider>
+                <Dashboard />
+              </StationLocationProvider>
+            </UserLocationProvider>
+          </ProtectedRoute>
         }
       />
       <Route

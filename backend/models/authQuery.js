@@ -15,7 +15,6 @@ const createTables = async () => {
     await pool.query(
       `CREATE TABLE IF NOT EXISTS station(
         s_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-        u_id INT NOT NULL, 
         name VARCHAR(255) NOT NULL, 
         address VARCHAR(512) NOT NULL, 
         lat REAL NOT NULL, 
@@ -28,7 +27,8 @@ const createTables = async () => {
         review REAL DEFAULT 0, 
         phone_number VARCHAR(20) NOT NULL, 
         ac_type BOOLEAN DEFAULT FALSE, 
-        dc_type BOOLEAN DEFAULT FALSE,
+        dc_type BOOLEAN DEFAULT FALSE, 
+        u_id INT NOT NULL,
         FOREIGN KEY (u_id) REFERENCES auth(id));`
     );
         console.log("2")
@@ -54,6 +54,7 @@ const createTables = async () => {
         av_end_time TIME NOT NULL, 
         av_book_date DATE NOT NULL, 
         av_slots INT NOT NULL,
+        cost INT NOT NULL,
         counter INT DEFAULT 0, 
         FOREIGN KEY (s_id) REFERENCES station(s_id));`);
       console.log("created available")

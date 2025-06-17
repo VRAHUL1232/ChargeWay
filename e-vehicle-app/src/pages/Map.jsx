@@ -10,23 +10,39 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import Spinner from "../components/Spinner";
-import locationData from "../assets/dataset";
 import "../index.css";
 import { UserLocationContext } from "../context/userLocation";
+import { StationLocationContext } from "../context/stationLocation";
 const LocationAccess = () => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState("");
   const [permission, setPermission] = useState("prompt");
   const [progress, setProgress] = useState(null);
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const { location, setLocationData } = useContext(UserLocationContext);
+  const { stationData } = useContext(StationLocationContext);
+
+  const filteredData = stationData.filter(
+    (station) =>
+      station.name.toLowerCase().includes(search.toLowerCase()) ||
+      station.address.toLowerCase().includes(search.toLowerCase())
+  );
 
   const markLocation = (newlocation) => {
     const el = document.createElement("div");
-    el.innerHTML =
-      '<svg class="w-8 h-8 sm:w-12 sm:h-12 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path></svg>';
+    el.innerHTML = `
+  <svg 
+    class="w-8 h-8 sm:w-12 sm:h-12" 
+    viewBox="0 0 20 20" 
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <circle cx="10" cy="10" r="8" fill="#2563EB" />
+    <circle cx="10" cy="10" r="4" fill="white" />
+  </svg>
+`;
     const map = mapRef.current;
     new mapboxgl.Marker(el)
       .setLngLat([newlocation.longitude, newlocation.latitude])
@@ -48,48 +64,57 @@ const LocationAccess = () => {
     }
   };
 
+  const handleSearchChange = (e) => {
+    setSearch(e.target.value);
+    console.log(e.target.value);
+  };
+
   const handleRequest = async () => {
     setLoading(true);
-    await navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const newLocation = {
-          longitude: position.coords.longitude,
-          latitude: position.coords.latitude,
-        };
-        setLocationData(newLocation);
-        markLocation(newLocation);
-        if (mapRef.current) {
-          mapRef.current.flyTo({
-            center: [newLocation.longitude, newLocation.latitude],
-            zoom: 12,
-            essential: true,
-          });
-        }
-        setSuccess("Granted Location Access Successfully.");
-      },
-      (error) => {
-        console.log("Permission denied or error:", error);
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            setError("Location access denied by user");
-            setPermission("denied");
-            break;
-          case error.POSITION_UNAVAILABLE:
-            setError("Location information is unavailable");
-            break;
-          case error.TIMEOUT:
-            setError("Location request timed out");
-            break;
-          default:
-            setError("An unknown error occurred while retrieving location");
-            break;
-        }
-      },
-      {
-        enableHighAccuracy: true,
-        maximumAge: 0,
+    try {
+      const position = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          maximumAge: 0,
+        });
+      });
+      const newLocation = {
+        longitude: position.coords.longitude,
+        latitude: position.coords.latitude,
+      };
+
+      setLocationData(newLocation);
+      markLocation(newLocation);
+
+      if (mapRef.current) {
+        mapRef.current.flyTo({
+          center: [newLocation.longitude, newLocation.latitude],
+          zoom: 12,
+          essential: true,
+        });
       }
-    );
+
+      setSuccess("Granted Location Access Successfully.");
+      setPermission("granted");
+    } catch (error) {
+      console.log("Permission denied or error:", error);
+
+      switch (error.code) {
+        case error.PERMISSION_DENIED:
+          setError("Location access denied by user");
+          setPermission("denied");
+          break;
+        case error.POSITION_UNAVAILABLE:
+          setError("Location information is unavailable");
+          break;
+        case error.TIMEOUT:
+          setError("Location request timed out");
+          break;
+        default:
+          setError("An unknown error occurred while retrieving location");
+          break;
+      }
+    }
     setLoading(false);
   };
 
@@ -150,14 +175,31 @@ const LocationAccess = () => {
       const map = mapRef.current;
       map.on("load", () => {
         markLocation(location);
-        locationData.forEach((location) => {
+        stationData.data.map((location) => {
           const el = document.createElement("div");
           el.innerHTML =
             '<svg class="w-8 h-8 sm:w-12 sm:h-12 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path></svg>';
-
           new mapboxgl.Marker(el)
-            .setLngLat([location.longitude, location.latitude])
+            .setLngLat([location.lng, location.lat])
             .addTo(map);
+          const popup = new mapboxgl.Popup({
+            closeButton: false,
+            closeOnClick: false,
+            offset: 25,
+          }).setHTML(`
+    <div class=" text-sm text-gray-800">
+      <h3 class="font-bold text-blue-600">${location.name}</h3>
+      <p>${location.address || "No address available"}</p>
+    </div>
+  `);
+
+          el.addEventListener("mouseenter", () =>
+            popup.addTo(map).setLngLat([location.lng, location.lat])
+          );
+          el.addEventListener("mouseleave", () => popup.remove());
+          el.addEventListener("click", () => {
+            // handleStationClick(location.id);
+          });
         });
       });
 
@@ -168,12 +210,7 @@ const LocationAccess = () => {
         map.setFog({});
       });
     }
-    return () => {
-      if (mapRef.current) {
-        mapRef.current.remove();
-        mapRef.current = null;
-      }
-    };
+    return () => {};
   }, []);
 
   useEffect(() => {
@@ -273,9 +310,30 @@ const LocationAccess = () => {
       <div className="absolute w-3/4 top-4 left-1/2 transform -translate-x-1/2 z-10">
         <input
           type="text"
+          name="search"
+          value={search}
+          onChange={handleSearchChange}
           placeholder="Search location..."
           className="w-full px-4 py-2 rounded-lg shadow border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
         />
+        {search.length > 0 ? (
+          <div className="h-[50vh] w-full flex flex-col bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+            <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+              <div className="p-2 sm:p-3 md:p-4 space-y-1 sm:space-y-2">
+                {filteredData.map((data) => (
+                  <div
+                    key={data.u_id}
+                    className="text-black text-sm sm:text-base md:text-lg p-2 sm:p-3 md:p-4 hover:bg-gray-300 rounded-lg cursor-pointer"
+                  >
+                    {data.name}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <></>
+        )}
       </div>
       <div className="absolute right-8 top-5/6 transform -translate-y-5/6 md:right-12 z-10">
         <button
