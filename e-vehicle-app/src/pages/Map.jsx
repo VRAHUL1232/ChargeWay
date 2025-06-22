@@ -1,9 +1,5 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
 import {
-  MapPin,
-  AlertCircle,
-  CheckCircle,
-  Loader,
   LocateFixed,
 } from "lucide-react";
 import "mapbox-gl/dist/mapbox-gl.css";
