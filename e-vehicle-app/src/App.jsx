@@ -36,14 +36,6 @@ function App() {
           </ProtectedRoute>
         }
       />
-      <Route
-        path="/contact"
-        element={
-          <ProtectedRoute isAllowed={["User"]}>
-            <Contact />
-          </ProtectedRoute>
-        }
-      />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

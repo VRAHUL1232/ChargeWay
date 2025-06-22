@@ -6,6 +6,7 @@ import UnAuthorisedPage from "./UnAuthorisedPage";
 function ProtectedRoute({ children, isAllowed }) {
   const [isAuth, setIsAuth] = useState(true);
   const navigate = useNavigate();
+  const role = localStorage.getItem("role");
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -14,6 +15,10 @@ function ProtectedRoute({ children, isAllowed }) {
         navigate("/login");
         setIsAuth(false);
         return;
+      }
+
+      if (!isAllowed?.includes(role)){
+        navigate("/login");
       }
 
       try {
@@ -34,11 +39,8 @@ function ProtectedRoute({ children, isAllowed }) {
 
     checkAuth();
   }, []);
-
-  const role = localStorage.getItem("role");
-  const roleAllowed = !isAllowed || !isAllowed.includes(role) ? false : true;
-
-  return <div>{isAuth && roleAllowed ? children : <UnAuthorisedPage />}</div>;
+  
+  return <div>{children}</div>;
 }
 
 export default ProtectedRoute;

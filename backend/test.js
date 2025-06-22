@@ -1327,7 +1327,7 @@ const insertStations = async (req, res) => {
         data.phone_number,
         data.acsource,
         data.dcsource,
-        2
+        1
       ]
     );
 

@@ -261,11 +261,10 @@ const AuthPage = ({ isLogin }) => {
     } catch (err) {
       if (err.response) {
         const { data } = err.response;
-        setSubmitError(data.error);
+        setSubmitError(data.error || "Something went wrong!");
       } else {
         setSubmitError(
-          "Request Failed! Check your internet connection.",
-          err.message
+          "Request Failed! Check your internet connection."
         );
       }
       console.log("error", err);
@@ -293,7 +292,7 @@ const AuthPage = ({ isLogin }) => {
         password,
       });
 
-      if (response.status === 200) {
+      if (response.status === 201) {
         console.log("✅ User created successfully:");
       }
       console.log("Signup submitted:", response);
@@ -304,11 +303,10 @@ const AuthPage = ({ isLogin }) => {
     } catch (err) {
       if (err.response) {
         const { data } = err.response;
-        setSubmitError(data.error);
+        setSubmitError(data.error || "Something went wrong!");
       } else {
         setSubmitError(
-          "Request failed! Check your internet connection.",
-          err.message
+          "Request failed! Check your internet connection."
         );
       }
       console.log(err);

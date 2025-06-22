@@ -13,6 +13,9 @@ import Spinner from "../components/Spinner";
 import "../index.css";
 import { UserLocationContext } from "../context/userLocation";
 import { StationLocationContext } from "../context/stationLocation";
+import { motion, AnimatePresence } from 'framer-motion';
+
+
 const LocationAccess = () => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
@@ -24,12 +27,13 @@ const LocationAccess = () => {
   const mapRef = useRef(null);
   const { location, setLocationData } = useContext(UserLocationContext);
   const { stationData } = useContext(StationLocationContext);
+  const [selectedStation, setSelectedStation] = useState(null);
+  const popupRef = useRef(null);
 
-  const filteredData = stationData.filter(
-    (station) =>
-      station.name.toLowerCase().includes(search.toLowerCase()) ||
-      station.address.toLowerCase().includes(search.toLowerCase())
-  );
+  const [isOpen, setIsOpen] = useState(false);
+
+  const openModal = () => setIsOpen(true);
+  const closeModal = () => setIsOpen(false);
 
   const markLocation = (newlocation) => {
     const el = document.createElement("div");
@@ -48,6 +52,29 @@ const LocationAccess = () => {
       .setLngLat([newlocation.longitude, newlocation.latitude])
       .addTo(map);
   };
+
+  const searchFilterLocation = () => {
+    const filteredData = stationData?.data
+      .filter((location) => {
+        if (location.name.toLowerCase().includes(search.toLowerCase().trim()) || location.address.toLowerCase().includes(search.toLowerCase().trim())) {
+          return true;
+        }
+      });
+    return filteredData;
+  };
+
+  const handleStationClick = (id) => {
+    const currentStation = stationData?.data.find((location) => location.s_id === id);
+    mapRef.current.flyTo({
+          center: [currentStation.lng, currentStation.lat],
+          offset: [0, -100],
+          zoom: 15,
+          essential: true,
+        });
+    setSelectedStation(currentStation);
+    console.log("Selected Station:", currentStation);
+    openModal();
+  }
 
   const checkLocationPermission = async () => {
     if (!navigator.permissions) {
@@ -122,6 +149,7 @@ const LocationAccess = () => {
     setLoading(true);
     await new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
+        setLoading(false);
         reject("Geolocation not supported");
         return;
       }
@@ -144,6 +172,7 @@ const LocationAccess = () => {
         },
         (err) => {
           console.log("currentLoc", err);
+          setLoading(false);
           reject(err);
         },
         {
@@ -175,7 +204,7 @@ const LocationAccess = () => {
       const map = mapRef.current;
       map.on("load", () => {
         markLocation(location);
-        stationData.data.map((location) => {
+        stationData?.data.map((location) => {
           const el = document.createElement("div");
           el.innerHTML =
             '<svg class="w-8 h-8 sm:w-12 sm:h-12 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path></svg>';
@@ -187,30 +216,25 @@ const LocationAccess = () => {
             closeOnClick: false,
             offset: 25,
           }).setHTML(`
-    <div class=" text-sm text-gray-800">
-      <h3 class="font-bold text-blue-600">${location.name}</h3>
+    <div class="text-sm rounded-lg text-gray-800">
+      <h3 class="font-bold text-lg text-green-700">${location.name}</h3>
       <p>${location.address || "No address available"}</p>
     </div>
   `);
-
           el.addEventListener("mouseenter", () =>
             popup.addTo(map).setLngLat([location.lng, location.lat])
           );
           el.addEventListener("mouseleave", () => popup.remove());
           el.addEventListener("click", () => {
-            // handleStationClick(location.id);
+            handleStationClick(location.s_id);
           });
         });
       });
 
       map.addControl(new mapboxgl.NavigationControl());
       map.scrollZoom.disable();
-
-      map.on("style.load", () => {
-        map.setFog({});
-      });
     }
-    return () => {};
+    return () => { };
   }, []);
 
   useEffect(() => {
@@ -229,6 +253,24 @@ const LocationAccess = () => {
     }
     fetchData();
   }, []);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (popupRef.current && !popupRef.current.contains(event.target)) {
+        closeModal();
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     if (error) {
@@ -273,9 +315,8 @@ const LocationAccess = () => {
   mapboxgl.accessToken = import.meta.env.VITE_API_TOKEN;
   return (
     <div
-      className={`relative w-full h-[100dvh] sm:h-full font-sans ${
-        loading ? `opacity-40` : ""
-      }`}
+      className={`relative w-full h-[100dvh] sm:h-full font-sans ${loading ? `opacity-40` : ""
+        }`}
     >
       <div ref={mapContainerRef} className="w-full h-full" />
       {loading && (
@@ -307,6 +348,29 @@ const LocationAccess = () => {
           />
         </div>
       )}
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ y: '100%', opacity: 1 }}
+            animate={{ y: '0%', opacity: 1 }}
+            exit={{ y: '100%', opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            
+            className="fixed bottom-0 left-0 md:left-64 right-0 h-1/2 bg-white rounded-t-4xl p-6 z-50 flex flex-col items-center justify-center"
+          >
+            <h2 className="text-2xl font-bold mb-4">{selectedStation.s_id + selectedStation.name + selectedStation.address}</h2>
+            <p className="mb-6">You can place any content here.</p>
+            <button
+              onClick={closeModal}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+            >
+              Close
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="absolute w-3/4 top-4 left-1/2 transform -translate-x-1/2 z-10">
         <input
           type="text"
@@ -320,12 +384,33 @@ const LocationAccess = () => {
           <div className="h-[50vh] w-full flex flex-col bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
             <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
               <div className="p-2 sm:p-3 md:p-4 space-y-1 sm:space-y-2">
-                {filteredData.map((data) => (
+                {searchFilterLocation().length === 0 && (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="text-gray-500 text-sm sm:text-base md:text-lg">
+                      No locations found
+                    </div>
+                  </div>
+                )}
+                {searchFilterLocation().map((location) => (
                   <div
-                    key={data.u_id}
-                    className="text-black text-sm sm:text-base md:text-lg p-2 sm:p-3 md:p-4 hover:bg-gray-300 rounded-lg cursor-pointer"
+                    key={location.id}
+                    className="flex items-center space-x-2 p-2 sm:p-3 md:p-4 hover:bg-gray-50 cursor-pointer"
+                    onClick={() => {
+                      if (mapRef.current) {
+                        mapRef.current.flyTo({
+                          center: [location.lng, location.lat],
+                          offset: [0, -100],
+                          zoom: 15,
+                          essential: true,
+                        });
+                        handleStationClick(location.s_id);
+                      }
+                      setSearch("")
+                    }}
                   >
-                    {data.name}
+                    <div className="text-sm sm:text-base md:text-lg font-medium">
+                      {location.name}
+                    </div>
                   </div>
                 ))}
               </div>
