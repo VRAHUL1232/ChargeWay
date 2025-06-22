@@ -152,6 +152,8 @@ const LocationAccess = () => {
           essential: true,
         });
       }
+      setLoading(false);
+      return;
     }
     await new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
@@ -230,7 +232,11 @@ const LocationAccess = () => {
 
   useEffect(() => {
     if (!mapRef.current || !routeData) return;
-
+    mapRef.current.flyTo({
+      center: [location.longitude, location.latitude],
+      zoom: 12,
+      essential: true,
+    });
     if (mapRef.current.getSource('route')) {
       mapRef.current.removeLayer('route');
       mapRef.current.removeSource('route');
@@ -442,7 +448,7 @@ const LocationAccess = () => {
               Close
             </button>
             <button
-              onClick={()=> {getRoute({longitude: selectedStation.lng, latitude: selectedStation.lat})}}
+              onClick={() => { getRoute({ longitude: selectedStation.lng, latitude: selectedStation.lat }) }}
               className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
             >
               Route
