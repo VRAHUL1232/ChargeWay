@@ -25,7 +25,8 @@ const LocationAccess = () => {
   const { stationData } = useContext(StationLocationContext);
   const [selectedStation, setSelectedStation] = useState(null);
   const popupRef = useRef(null);
-
+  const [routeData, setRouteData] = useState(null);
+  mapboxgl.accessToken = import.meta.env.VITE_API_TOKEN;
   const [isOpen, setIsOpen] = useState(false);
 
   const openModal = () => setIsOpen(true);
@@ -62,11 +63,11 @@ const LocationAccess = () => {
   const handleStationClick = (id) => {
     const currentStation = stationData?.data.find((location) => location.s_id === id);
     mapRef.current.flyTo({
-          center: [currentStation.lng, currentStation.lat],
-          offset: [0, -100],
-          zoom: 15,
-          essential: true,
-        });
+      center: [currentStation.lng, currentStation.lat],
+      offset: [0, -100],
+      zoom: 15,
+      essential: true,
+    });
     setSelectedStation(currentStation);
     console.log("Selected Station:", currentStation);
     openModal();
@@ -143,6 +144,15 @@ const LocationAccess = () => {
 
   const getCurrentLocation = async () => {
     setLoading(true);
+    if (location.latitude && location.longitude) {
+      if (mapRef.current) {
+        mapRef.current.flyTo({
+          center: [location.longitude, location.latitude],
+          zoom: 12,
+          essential: true,
+        });
+      }
+    }
     await new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
         setLoading(false);
@@ -180,6 +190,71 @@ const LocationAccess = () => {
     });
     setLoading(false);
   };
+
+  const getRoute = async (destination) => {
+    try {
+      setLoading(true);
+      if (permission !== "granted") {
+        setError("Location access is not granted");
+        setLoading(false);
+        return;
+      }
+      const query = await fetch(
+        `https://api.mapbox.com/directions/v5/mapbox/driving/${location.longitude},${location.latitude};${destination.longitude},${destination.latitude}?steps=true&geometries=geojson&access_token=${mapboxgl.accessToken}`
+      );
+      const json = await query.json();
+      console.log("Route JSON:", json);
+      const data = json.routes[0].geometry;
+
+      setRouteData({
+        type: 'Feature',
+        properties: {},
+        geometry: data,
+      });
+      console.log("Route Data:", data);
+    } catch (error) {
+      console.error("Error fetching route:", error);
+      setError("Failed to fetch route data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const clearRoute = () => {
+    if (mapRef.current && mapRef.current.getSource('route')) {
+      mapRef.current.removeLayer('route');
+      mapRef.current.removeSource('route');
+      setRouteData(null);
+    }
+  };
+
+  useEffect(() => {
+    if (!mapRef.current || !routeData) return;
+
+    if (mapRef.current.getSource('route')) {
+      mapRef.current.removeLayer('route');
+      mapRef.current.removeSource('route');
+    }
+
+    mapRef.current.addSource('route', {
+      type: 'geojson',
+      data: routeData,
+    });
+
+    mapRef.current.addLayer({
+      id: 'route',
+      type: 'line',
+      source: 'route',
+      layout: {
+        'line-join': 'round',
+        'line-cap': 'round',
+      },
+      paint: {
+        'line-color': '#3b82f6',
+        'line-width': 6,
+      },
+    });
+  }, [routeData]);
 
   useEffect(() => {
     if (!mapRef.current) {
@@ -222,6 +297,7 @@ const LocationAccess = () => {
           );
           el.addEventListener("mouseleave", () => popup.remove());
           el.addEventListener("click", () => {
+            clearRoute();
             handleStationClick(location.s_id);
           });
         });
@@ -308,7 +384,6 @@ const LocationAccess = () => {
     }
   }, [success]);
 
-  mapboxgl.accessToken = import.meta.env.VITE_API_TOKEN;
   return (
     <div
       className={`relative w-full h-[100dvh] sm:h-full font-sans ${loading ? `opacity-40` : ""
@@ -352,16 +427,25 @@ const LocationAccess = () => {
             animate={{ y: '0%', opacity: 1 }}
             exit={{ y: '100%', opacity: 1 }}
             transition={{ duration: 0.5 }}
-            
-            className="fixed bottom-0 left-0 md:left-64 right-0 h-1/2 bg-white rounded-t-4xl p-6 z-50 flex flex-col items-center justify-center"
+
+            className="fixed bottom-0 left-0 md:left-64 right-0 h-1/3 bg-white rounded-t-4xl p-6 z-50 flex flex-col items-center justify-center"
           >
             <h2 className="text-2xl font-bold mb-4">{selectedStation.s_id + selectedStation.name + selectedStation.address}</h2>
             <p className="mb-6">You can place any content here.</p>
             <button
-              onClick={closeModal}
+              onClick={() => {
+                closeModal();
+                clearRoute();
+              }}
               className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
             >
               Close
+            </button>
+            <button
+              onClick={()=> {getRoute({longitude: selectedStation.lng, latitude: selectedStation.lat})}}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+            >
+              Route
             </button>
           </motion.div>
         )}
