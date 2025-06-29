@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useContext } from "react";
 import {
   LocateFixed,
 } from "lucide-react";
+import { X, Clock, MapPin, Fuel, Zap, Car, CreditCard, Star, Wifi, Store, Wrench } from 'lucide-react';
 import "mapbox-gl/dist/mapbox-gl.css";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -235,6 +236,7 @@ const LocationAccess = () => {
     mapRef.current.flyTo({
       center: [location.longitude, location.latitude],
       zoom: 12,
+      offset: [0, -100],
       essential: true,
     });
     if (mapRef.current.getSource('route')) {
@@ -390,6 +392,51 @@ const LocationAccess = () => {
     }
   }, [success]);
 
+  const stationFeatures = [
+    {
+      label: 'Fuel Types',
+      startTime: "8:30 AM",
+      endTime: "10:30 AM",
+      cost: 30,
+      slots: 3
+    },
+    {
+      label: 'Fuel Types',
+      startTime: "8:30 AM",
+      endTime: "10:30 AM",
+      cost: 30,
+      slots: 3
+    },
+    {
+      label: 'Fuel Types',
+      startTime: "8:30 AM",
+      endTime: "10:30 AM",
+      cost: 30,
+      slots: 3
+    },
+    {
+      label: 'Fuel Types',
+      startTime: "8:30 AM",
+      endTime: "10:30 AM",
+      cost: 30,
+      slots: 3
+    },
+    {
+      label: 'Fuel Types',
+      startTime: "8:30 AM",
+      endTime: "10:30 AM",
+      cost: 30,
+      slots: 3
+    },
+    {
+      label: 'Fuel Types',
+      startTime: "8:30 AM",
+      endTime: "10:30 AM",
+      cost: 30,
+      slots: 3
+    }
+  ];
+
   return (
     <div
       className={`relative w-full h-[100dvh] sm:h-full font-sans ${loading ? `opacity-40` : ""
@@ -434,24 +481,58 @@ const LocationAccess = () => {
             exit={{ y: '100%', opacity: 1 }}
             transition={{ duration: 0.5 }}
 
-            className="fixed bottom-0 left-0 md:left-64 right-0 h-1/3 bg-white rounded-t-4xl p-6 z-50 flex flex-col items-center justify-center"
+            className="fixed bottom-0 left-0 md:left-64 right-0 h-1/2 bg-white rounded-t-4xl px-6 py-4 md:p-8 z-50 flex flex-col gap-3 items-start justify-center"
           >
-            <h2 className="text-2xl font-bold mb-4">{selectedStation.s_id + selectedStation.name + selectedStation.address}</h2>
-            <p className="mb-6">You can place any content here.</p>
-            <button
-              onClick={() => {
-                closeModal();
-                clearRoute();
-              }}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-            >
-              Close
-            </button>
+            <div className="flex flex-row justify-between gap-2 w-full items-center">
+              <h2 className="text-2xl font-bold truncate max-w-full">{selectedStation.name}</h2>
+              <button
+                onClick={() => { closeModal(); clearRoute() }}
+                className="text-red-800 font-bold text-2xl "
+              >
+                X
+              </button>
+            </div>
+            <p className="truncate max-w-full">{selectedStation.address}</p>
+            <div className="flex flex-row gap-2 w-full items-center justify-between">
+              <div className="flex flex-wrap gap-2 items-center">
+                <h1 className="text-lg text-green-700 font-bold">Available Port:</h1>
+                {selectedStation.ac1 == true ? <div>AC1</div> : <></>}
+                {selectedStation.ac2 == true ? <div>AC2</div> : <></>}
+                {selectedStation.dc1 == true ? <div>DC1</div> : <></>}
+                {selectedStation.dc2 == true ? <div>DC2</div> : <></>}
+              </div>
+              <button
+                onClick={() => { getRoute({ longitude: selectedStation.lng, latitude: selectedStation.lat }) }}
+                className="px-3 py-2 font-bold text-md w-auto flex justify-center items-center bg-red-500 hover:bg-red-600 text-white rounded-2xl"
+              >
+                Direction
+              </button>
+            </div>
+            <div className="flex-1 w-full">
+              <div className="flex space-x-3 overflow-x-auto custom-scrollbar mx-auto w-full h-full">
+                {stationFeatures.map((feature) => {
+                  return (
+                    <div
+                      key={feature.id}
+                      className={`flex-shrink-0 bg-green-100 text-white shadow-b-lg rounded-2xl p-3 min-w-4/6 h-auto lg:min-w-1/2 xl:min-w-1/3`}
+                    >
+                      <div className="flex items-center space-x-2 text-black mb-1">
+                        <span className={`text-xs font-medium`}>
+                          {feature.startTime + ' ' + feature.endTime}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-700">{feature.slots}</p>
+                      <p>{feature.cost}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
             <button
               onClick={() => { getRoute({ longitude: selectedStation.lng, latitude: selectedStation.lat }) }}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+              className="px-4 py-3 font-bold text-xl w-1/3 mx-auto flex justify-center items-center bg-green-500 hover:bg-green-600 text-white rounded-2xl"
             >
-              Route
+              Book
             </button>
           </motion.div>
         )}
@@ -492,6 +573,7 @@ const LocationAccess = () => {
                         handleStationClick(location.s_id);
                       }
                       setSearch("")
+                      clearRoute();
                     }}
                   >
                     <div className="text-sm sm:text-base md:text-lg font-medium">
