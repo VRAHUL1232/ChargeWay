@@ -40,6 +40,7 @@ const getAvailableStations = async (stationId) => {
       const newDateTime2 = new Date(newDate2);
       return newDateTime1-newDateTime2;
     })
+    console.log(sortedFilteredAvailableSlot)
     return sortedFilteredAvailableSlot;
   } catch (err) {
     throw new Error(err.message)
