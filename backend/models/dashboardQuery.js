@@ -20,11 +20,30 @@ const FormattedDate = (dateObj) => {
   return formattedDate
 }
 
+const FormattedDate2 = (dateNow) => {
+  const [date, time] = dateNow.split(', ');
+  const [day, month, year] = date.split('/');
+
+  const formattedIST = `${year}-${month}-${day}T${time}`;
+  console.log(time)
+  return formattedIST;
+}
+
+
 const getAvailableStations = async (stationId) => {
   try {
     const availableSlot = await pool.query(`SELECT * FROM available where s_id=$1`, [stationId]);
-    const currentDateTime = Date.now();
-
+    const currentDateTimeIST = new Date().toLocaleString("en-GB", {
+      timeZone: "Asia/Kolkata",
+      hour12: false,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit"
+    });
+    const currentDateTime = new Date(FormattedDate2(currentDateTimeIST)).getTime();
     const filteredAvailableSlot = availableSlot.rows.filter((data) => {
       const newDate = FormattedDate(data.av_book_date) + 'T' + data.av_start_time;
       const availableDateTime = new Date(newDate);
