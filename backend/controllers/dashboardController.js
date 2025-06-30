@@ -17,7 +17,18 @@ const stationData = async (req, res) => {
   }
 };
 
+const availableSlot = async (req, res) => {
+  try {
+    const stationId = req.params.stationId;
+    const data = await query.getAvailableStations(stationId);
+    return res.status(200).json({data : data})
+  } catch (err) {
+    console.log(err)
+  }
+}
+
 
 module.exports = {
-  stationData
+  stationData,
+  availableSlot
 };

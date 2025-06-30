@@ -11,6 +11,8 @@ import "../index.css";
 import { UserLocationContext } from "../context/userLocation";
 import { StationLocationContext } from "../context/stationLocation";
 import { motion, AnimatePresence } from 'framer-motion';
+import axios from "axios";
+import { replace, useNavigate } from "react-router-dom";
 
 
 const LocationAccess = () => {
@@ -28,7 +30,13 @@ const LocationAccess = () => {
   const popupRef = useRef(null);
   const [routeData, setRouteData] = useState(null);
   mapboxgl.accessToken = import.meta.env.VITE_API_TOKEN;
+  const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST;
   const [isOpen, setIsOpen] = useState(false);
+  const [distance, setDistance] = useState(null);
+  const [time, setTime] = useState(null);
+  const [stationFeatures, setStationFeatures] = useState([]);
+
+  const navigate = useNavigate();
 
   const openModal = () => setIsOpen(true);
   const closeModal = () => setIsOpen(false);
@@ -61,7 +69,7 @@ const LocationAccess = () => {
     return filteredData;
   };
 
-  const handleStationClick = (id) => {
+  const handleStationClick = async (id) => {
     const currentStation = stationData?.data.find((location) => location.s_id === id);
     mapRef.current.flyTo({
       center: [currentStation.lng, currentStation.lat],
@@ -69,6 +77,25 @@ const LocationAccess = () => {
       zoom: 15,
       essential: true,
     });
+    try {
+      setLoading(true);
+      const response = await axios.get(`${VITE_LOCALHOST}/availableSlot/${id}`);
+      const query = await fetch(
+        `https://api.mapbox.com/directions/v5/mapbox/driving/${location.longitude},${location.latitude};${currentStation.lng},${currentStation.lat}?steps=true&geometries=geojson&access_token=${mapboxgl.accessToken}`
+      );
+      const json = await query.json();
+      console.log(json, "json data")
+      const newDistance = json.routes[0].distance;
+      const newDuration = json.routes[0].duration;
+      setDistance((newDistance / 1000).toFixed(1));
+      setTime((newDuration / 60).toFixed(0));
+      console.log(newDistance, newDuration, "new distance and time");
+      setStationFeatures(response.data.data);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
     setSelectedStation(currentStation);
     console.log("Selected Station:", currentStation);
     openModal();
@@ -109,6 +136,7 @@ const LocationAccess = () => {
       };
 
       setLocationData(newLocation);
+      console.log(newLocation);
       markLocation(newLocation);
 
       if (mapRef.current) {
@@ -231,6 +259,28 @@ const LocationAccess = () => {
     }
   };
 
+  const getDate = (date) => {
+    const d = new Date(date);
+    console.log(date, "curent date of the solts");
+    const formatted = new Intl.DateTimeFormat('en-GB', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric'
+    }).format(new Date(date));
+
+    return formatted;
+  }
+
+  const getTime = (start, end) => {
+    return start.slice(0, 5) + ' - ' + end.slice(0, 5)
+  }
+
+  const getCost = (cost, start, end) => {
+    const st = Number(start.slice(0, 2)) * 60 + Number(start.slice(3, 2));
+    const ed = Number(end.slice(0, 2)) * 60 + Number(end.slice(3, 2));
+    return ((ed - st) / 60) * cost;
+  }
+
   useEffect(() => {
     if (!mapRef.current || !routeData) return;
     mapRef.current.flyTo({
@@ -296,7 +346,7 @@ const LocationAccess = () => {
             offset: 25,
           }).setHTML(`
     <div class="text-sm rounded-lg text-gray-800">
-      <h3 class="font-bold text-lg text-green-700">${location.name}</h3>
+      <h3 class="font-bold text-lg text-green-700">${location.name + location.s_id}</h3>
       <p>${location.address || "No address available"}</p>
     </div>
   `);
@@ -392,51 +442,6 @@ const LocationAccess = () => {
     }
   }, [success]);
 
-  const stationFeatures = [
-    {
-      label: 'Fuel Types',
-      startTime: "8:30 AM",
-      endTime: "10:30 AM",
-      cost: 30,
-      slots: 3
-    },
-    {
-      label: 'Fuel Types',
-      startTime: "8:30 AM",
-      endTime: "10:30 AM",
-      cost: 30,
-      slots: 3
-    },
-    {
-      label: 'Fuel Types',
-      startTime: "8:30 AM",
-      endTime: "10:30 AM",
-      cost: 30,
-      slots: 3
-    },
-    {
-      label: 'Fuel Types',
-      startTime: "8:30 AM",
-      endTime: "10:30 AM",
-      cost: 30,
-      slots: 3
-    },
-    {
-      label: 'Fuel Types',
-      startTime: "8:30 AM",
-      endTime: "10:30 AM",
-      cost: 30,
-      slots: 3
-    },
-    {
-      label: 'Fuel Types',
-      startTime: "8:30 AM",
-      endTime: "10:30 AM",
-      cost: 30,
-      slots: 3
-    }
-  ];
-
   return (
     <div
       className={`relative w-full h-[100dvh] sm:h-full font-sans ${loading ? `opacity-40` : ""
@@ -481,7 +486,7 @@ const LocationAccess = () => {
             exit={{ y: '100%', opacity: 1 }}
             transition={{ duration: 0.5 }}
 
-            className="fixed bottom-0 left-0 md:left-64 right-0 h-1/2 bg-white rounded-t-4xl px-6 py-4 md:p-8 z-50 flex flex-col gap-3 items-start justify-center"
+            className="fixed bottom-0 left-0 md:left-64 right-0 h-auto bg-white rounded-t-4xl p-6 md:p-8 z-50 flex flex-col gap-2 md:gap-4 items-start justify-center"
           >
             <div className="flex flex-row justify-between gap-2 w-full items-center">
               <h2 className="text-2xl font-bold truncate max-w-full">{selectedStation.name}</h2>
@@ -492,14 +497,19 @@ const LocationAccess = () => {
                 X
               </button>
             </div>
-            <p className="truncate max-w-full">{selectedStation.address}</p>
-            <div className="flex flex-row gap-2 w-full items-center justify-between">
-              <div className="flex flex-wrap gap-2 items-center">
-                <h1 className="text-lg text-green-700 font-bold">Available Port:</h1>
-                {selectedStation.ac1 == true ? <div>AC1</div> : <></>}
-                {selectedStation.ac2 == true ? <div>AC2</div> : <></>}
-                {selectedStation.dc1 == true ? <div>DC1</div> : <></>}
-                {selectedStation.dc2 == true ? <div>DC2</div> : <></>}
+            <div className="flex flex-wrap gap-x-6 gap-y-2 md:gap-y-4 w-full items-center justify-between">
+              <p className="truncate max-w-full">{selectedStation.address}</p>
+              <div className="text-green-700 text-lg font-bold xl:w-1/4 ">
+                Contact: <span className="text-black font-semibold">{selectedStation.phone_number}</span>
+              </div>
+              <div className="text-green-700 text-lg font-bold xl:w-1/4">
+                Review: <span className="text-black">{selectedStation.review} <span style={{ color: 'gold', fontSize: '24px' }}>★</span></span>
+              </div>
+              <div className="text-green-700 text-lg font-bold xl:w-1/4">
+                Distance: <span className="text-black">{distance} Km</span>
+              </div>
+              <div className="text-green-700 text-lg font-bold xl:w-1/4">
+                Duration: <span className="text-black">{time} Min</span>
               </div>
               <button
                 onClick={() => { getRoute({ longitude: selectedStation.lng, latitude: selectedStation.lat }) }}
@@ -508,32 +518,39 @@ const LocationAccess = () => {
                 Direction
               </button>
             </div>
-            <div className="flex-1 w-full">
-              <div className="flex space-x-3 overflow-x-auto custom-scrollbar mx-auto w-full h-full">
-                {stationFeatures.map((feature) => {
+            <div className="flex flex-wrap gap-2 items-center justify-center">
+              <h1 className="text-lg text-green-700 font-bold">Available Port:</h1>
+              {selectedStation.ac1 == true ? <div>AC1</div> : <></>}
+              {selectedStation.ac2 == true ? <div>AC2</div> : <></>}
+              {selectedStation.dc1 == true ? <div>DC1</div> : <></>}
+              {selectedStation.dc2 == true ? <div>DC2</div> : <></>}
+            </div>
+            <div className="w-full h-auto">
+              <div className="flex overflow-x-auto custom-scrollbar mx-auto w-full gap-3 md:gap-6 h-auto">
+                {stationFeatures.length == 0 && <div
+                  className={`flex flex-col justify-center items-center text-gray-500 text-xl font-bold w-full py-8`}
+                >No Slots Available!</div>}
+                {stationFeatures.length > 0 && stationFeatures?.map((feature, index) => {
                   return (
                     <div
-                      key={feature.id}
-                      className={`flex-shrink-0 bg-green-100 text-white shadow-b-lg rounded-2xl p-3 min-w-4/6 h-auto lg:min-w-1/2 xl:min-w-1/3`}
+                      key={feature.av_id}
+                      className={`flex flex-col justify-center items-center bg-green-100 hover:bg-green-200 text-black font-bold shadow-b-lg rounded-2xl pt-2 pb-4 px-6 min-w-4/6 lg:min-w-1/2 xl:min-w-1/3`}
+                      onClick={() => { navigate(`/booking/${selectedStation.s_id}`) }}
                     >
-                      <div className="flex items-center space-x-2 text-black mb-1">
-                        <span className={`text-xs font-medium`}>
-                          {feature.startTime + ' ' + feature.endTime}
-                        </span>
+                      <h1 className="mb-3 text-black">Booking Slot - {index + 1} </h1>
+                      <div className="grid grid-cols-2 gap-x-2 text-black">
+                        <h1 className="text-black">Date:</h1>
+                        <h1 className="text-green-600">{getDate(feature.av_book_date)}</h1>
+                        <h1 className="text-black">Timing: </h1>
+                        <h1 className="text-green-600">{getTime(feature.av_start_time, feature.av_end_time)}</h1>
+                        <h1 className="text-black">Available: <span className="text-green-600">{" " + feature.av_slots}</span></h1>
+                        <h1 className="text-black">Total Cost: <span className="text-green-600">{" $" + getCost(feature.cost, feature.av_start_time, feature.av_end_time)}</span></h1>
                       </div>
-                      <p className="text-sm text-gray-700">{feature.slots}</p>
-                      <p>{feature.cost}</p>
                     </div>
                   );
                 })}
               </div>
             </div>
-            <button
-              onClick={() => { getRoute({ longitude: selectedStation.lng, latitude: selectedStation.lat }) }}
-              className="px-4 py-3 font-bold text-xl w-1/3 mx-auto flex justify-center items-center bg-green-500 hover:bg-green-600 text-white rounded-2xl"
-            >
-              Book
-            </button>
           </motion.div>
         )}
       </AnimatePresence>

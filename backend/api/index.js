@@ -25,7 +25,7 @@ app.get("/", (req, res) => {
 
 app.use("/", authRoute);
 
-app.use("/",dashboardRoute)
+app.use("/",dashboardRoute);
 
 app.listen(PORT , () => {
   console.log(`Server is running in http://localhost:/api/${PORT}`);

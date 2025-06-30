@@ -1308,7 +1308,7 @@ const stationData = dummyplaces.map((place) => {
   return newdata;
 });
 
-const pool = require("./config/db"); 
+const pool = require("./config/db");
 
 const insertStations = async (req, res) => {
   try {
@@ -1348,8 +1348,7 @@ const insertStations = async (req, res) => {
         ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`;
 
     values.map(async (data) => {
-        console.log("data", data)
-        const result = await pool.query(query, data);
+      const result = await pool.query(query, data);
     })
     console.log("success");
   } catch (err) {
@@ -1357,4 +1356,71 @@ const insertStations = async (req, res) => {
   }
 };
 
-insertStations();
+
+const insertAvailable = async (req, res) => {
+  try {
+    const values = [];
+    for (let i = 1; i < 2; i++) {
+      tmp = [i, "10:40:00", "12:30:00", "2025-06-30", 3, 20, 3];
+      values.push(tmp);
+    }
+    const query = `INSERT INTO available (s_id,
+        av_start_time,
+        av_end_time,
+        av_book_date,
+        av_slots,
+        cost,
+        counter
+        ) VALUES ($1,$2,$3,$4,$5,$6,$7)`;
+
+    values.map(async (data) => {
+      const result = await pool.query(query, data);
+    })
+    console.log("success");
+  } catch (err) {
+    console.error("Insert error:", err);
+  }
+};
+
+const deleteAvailable = async (req, res) => {
+  try {
+    const query = `DELETE FROM available`;
+
+    const result = await pool.query(query);
+    console.log("success");
+  } catch (err) {
+    console.error("Insert error:", err);
+  }
+};
+
+const FormattedDate = (dateObj) => {
+  const yyyy = dateObj.getFullYear();
+  const mm = String(dateObj.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+  const dd = String(dateObj.getDate()).padStart(2, '0');
+
+  const formattedDate = `${yyyy}-${mm}-${dd}`;
+  return formattedDate
+}
+
+const getAvailable = async (req, res) => {
+  try {
+    const query = `SELECT * FROM available WHERE s_id=$1`;
+    const result = await pool.query(query, [1]);
+    console.log(result.rows);
+    const currentDateTime = Date.now();
+    console.log(currentDateTime)
+    const dates = result.rows.map((data) => {
+      const newDate = FormattedDate(data.av_book_date) + 'T' + data.av_start_time;
+      const availableDateTime = new Date(newDate);
+      console.log(newDate, "newdate")
+      if (currentDateTime < availableDateTime) {
+        return data.av_book_date + " " + data.av_start_time;
+      } else return "date expires"
+    })
+    console.log("success", dates);
+  } catch (err) {
+    console.error("Insert error:", err);
+  }
+}
+
+insertAvailable()

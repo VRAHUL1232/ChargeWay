@@ -9,6 +9,7 @@ import PageNotFound from "./pages/PageNotFound";
 import MapboxComponent from "./components/MapComponent";
 import { UserLocationProvider } from "./context/userLocation";
 import { StationLocationProvider } from "./context/stationLocation";
+import Booking from "./pages/Booking";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
       <Route path="/" element={<Homepage />} />
       <Route path="/login" element={<AuthPage isLogin={true} />} />
       <Route path="/register" element={<AuthPage isLogin={false} />} />
+      <Route path="/booking/:id" element={<ProtectedRoute><Booking/></ProtectedRoute>}/>
       <Route
         path="/adminpanel"
         element={
