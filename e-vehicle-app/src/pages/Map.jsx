@@ -503,7 +503,7 @@ const LocationAccess = () => {
               <div className="text-green-700 text-lg font-bold xl:w-1/4 ">
                 Contact: <span className="text-black font-semibold">{selectedStation.phone_number}</span>
               </div>
-              <div className="text-green-700 text-lg font-bold xl:w-1/4">
+              <div className="text-green-700 text-lg  font-bold xl:w-1/4">
                 Review: <span className="text-black">{selectedStation.review} <span style={{ color: 'gold', fontSize: '24px' }}>★</span></span>
               </div>
               <div className="text-green-700 text-lg font-bold xl:w-1/4">
@@ -535,17 +535,17 @@ const LocationAccess = () => {
                   return (
                     <div
                       key={feature.av_id}
-                      className={`flex flex-col justify-center items-center bg-green-100 hover:bg-green-200 text-black font-bold shadow-b-lg rounded-2xl pt-2 pb-4 px-6 min-w-4/6 lg:min-w-1/2 xl:min-w-1/3`}
+                      className={`flex flex-col justify-center items-center gap-2 bg-green-100 hover:bg-green-200 text-black font-bold shadow-b-lg rounded-2xl pt-2 pb-4 px-6 min-w-5/6 sm:min-w-2/3 lg:min-w-1/3 `}
                       onClick={() => { navigate(`/booking/${selectedStation.s_id}`) }}
                     >
-                      <h1 className="mb-3 text-black">Booking Slot - {index + 1} </h1>
-                      <div className="grid grid-cols-2 gap-x-2 text-black">
-                        <h1 className="text-black">Date:</h1>
-                        <h1 className="text-green-600">{getDate(feature.av_book_date)}</h1>
-                        <h1 className="text-black">Timing: </h1>
-                        <h1 className="text-green-600">{getTime(feature.av_start_time, feature.av_end_time)}</h1>
-                        <h1 className="text-black">Available: <span className="text-green-600">{" " + feature.av_slots}</span></h1>
-                        <h1 className="text-black">Total Cost: <span className="text-green-600">{" $" + getCost(feature.cost, feature.av_start_time, feature.av_end_time)}</span></h1>
+                      <h1 className=" text-black text-md md:text-lg">Booking Slot - {index + 1} </h1>
+                      <div className="grid grid-cols-2 gap-1 text-black">
+
+                        <h1 className="text-green-600 text-md md:text-lg">{getDate(feature.av_book_date)}</h1>
+
+                        <h1 className="text-green-600 text-md md:text-lg">{getTime(feature.av_start_time, feature.av_end_time)}</h1>
+                        <h1 className="text-black text-md md:text-lg">Available: <span className="text-green-600">{" " + feature.av_slots}</span></h1>
+                        <h1 className="text-black text-md md:text-lg">Total Cost: <span className="text-green-600">{" $" + getCost(feature.cost, feature.av_start_time, feature.av_end_time)}</span></h1>
                       </div>
                     </div>
                   );
