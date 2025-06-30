@@ -13,6 +13,7 @@ import { StationLocationContext } from "../context/stationLocation";
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from "axios";
 import { replace, useNavigate } from "react-router-dom";
+import axiosInstance from "../middleware/axiosInstance";
 
 
 const LocationAccess = () => {

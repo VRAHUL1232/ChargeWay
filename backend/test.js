@@ -1402,17 +1402,34 @@ const FormattedDate = (dateObj) => {
   return formattedDate
 }
 
+const FormattedDate2 = (dateNow) => {
+  const [date, time] = dateNow.split(', ');
+  const [day, month, year] = date.split('/');
+
+  const formattedIST = `${year}-${month}-${day}T${time}`;
+  console.log(time)
+  return formattedIST;
+}
+
 const getAvailable = async (req, res) => {
   try {
     const query = `SELECT * FROM available WHERE s_id=$1`;
     const result = await pool.query(query, [1]);
-    console.log(result.rows);
-    const currentDateTime = Date.now();
-    console.log(currentDateTime)
+    const currentDateTimeIST = new Date().toLocaleString("en-GB", {
+      timeZone: "Asia/Kolkata",
+      hour12: false,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit"
+    });
+    const currentDateTime = new Date(FormattedDate2(currentDateTimeIST)).getTime();
+    console.log(currentDateTime, "now date hash", Date.now())
     const dates = result.rows.map((data) => {
       const newDate = FormattedDate(data.av_book_date) + 'T' + data.av_start_time;
       const availableDateTime = new Date(newDate);
-      console.log(newDate, "newdate")
       if (currentDateTime < availableDateTime) {
         return data.av_book_date + " " + data.av_start_time;
       } else return "date expires"
@@ -1423,4 +1440,5 @@ const getAvailable = async (req, res) => {
   }
 }
 
-insertAvailable()
+
+getAvailable()

@@ -4,7 +4,7 @@ const Booking = () => {
 
     const { id } = useParams();
     return (
-        <div>Booking Page  {id}</div>
+        <div>Booking Page  {id} station Id</div>
     )
 }
 
