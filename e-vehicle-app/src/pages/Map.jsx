@@ -61,14 +61,34 @@ const LocationAccess = () => {
   };
 
   const searchFilterLocation = () => {
-    const filteredData = stationData?.data
-      .filter((location) => {
-        if (location.name.toLowerCase().includes(search.toLowerCase().trim()) || location.address.toLowerCase().includes(search.toLowerCase().trim())) {
-          return true;
-        }
-      });
-    return filteredData;
+    if (stationData) {
+      const filteredData = stationData?.data
+        .filter((location) => {
+          if (location.name.toLowerCase().includes(search.toLowerCase().trim()) || location.address.toLowerCase().includes(search.toLowerCase().trim())) {
+            return true;
+          }
+        });
+      return filteredData;
+    }
+    return null;
   };
+
+  const getDistanceTime = async (id) => {
+    try {
+      const currentStation = stationData?.data.find((location) => location.s_id === id);
+      const query = await fetch(
+        `https://api.mapbox.com/directions/v5/mapbox/driving/${location.longitude},${location.latitude};${currentStation.lng},${currentStation.lat}?steps=true&geometries=geojson&access_token=${mapboxgl.accessToken}`
+      );
+      const json = await query.json();
+      console.log(json, "json data")
+      const newDistance = json.routes[0].distance;
+      const newDuration = json.routes[0].duration;
+      setDistance((newDistance / 1000).toFixed(1));
+      setTime((newDuration / 60).toFixed(0));
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   const handleStationClick = async (id) => {
     const currentStation = stationData?.data.find((location) => location.s_id === id);
@@ -81,16 +101,6 @@ const LocationAccess = () => {
     try {
       setLoading(true);
       const response = await axios.get(`${VITE_LOCALHOST}/availableSlot/${id}`);
-      const query = await fetch(
-        `https://api.mapbox.com/directions/v5/mapbox/driving/${location.longitude},${location.latitude};${currentStation.lng},${currentStation.lat}?steps=true&geometries=geojson&access_token=${mapboxgl.accessToken}`
-      );
-      const json = await query.json();
-      console.log(json, "json data")
-      const newDistance = json.routes[0].distance;
-      const newDuration = json.routes[0].duration;
-      setDistance((newDistance / 1000).toFixed(1));
-      setTime((newDuration / 60).toFixed(0));
-      console.log(newDistance, newDuration, "new distance and time");
       setStationFeatures(response.data.data);
     } catch (error) {
       console.log(error);
@@ -116,6 +126,29 @@ const LocationAccess = () => {
       return null;
     }
   };
+
+  const handleAvailableSlotBar = async (selectedStation, currentAvailableSlot) => {
+    try {
+      setLoading(true);
+      const response = await axios.post("http://localhost:3000/checkAvailable", {
+        availableId: currentAvailableSlot.av_id,
+        slots: 1
+      });
+      console.log(response, "response for the slot");
+      if (response.status === 200) {
+        navigate(`/booking/${currentAvailableSlot.av_id}`)
+      } else {
+        setLoading(false);
+        closeModal()
+        setError("The slot is not available now.");
+      }
+    } catch (error) {
+      setLoading(false);
+      closeModal();
+      console.log(error)
+      setError("The slot is not available now.");
+    }
+  }
 
   const handleSearchChange = (e) => {
     setSearch(e.target.value);
@@ -276,12 +309,6 @@ const LocationAccess = () => {
     return start.slice(0, 5) + ' - ' + end.slice(0, 5)
   }
 
-  const getCost = (cost, start, end) => {
-    const st = Number(start.slice(0, 2)) * 60 + Number(start.slice(3, 2));
-    const ed = Number(end.slice(0, 2)) * 60 + Number(end.slice(3, 2));
-    return ((ed - st) / 60) * cost;
-  }
-
   useEffect(() => {
     if (!mapRef.current || !routeData) return;
     mapRef.current.flyTo({
@@ -358,6 +385,7 @@ const LocationAccess = () => {
           el.addEventListener("click", () => {
             clearRoute();
             handleStationClick(location.s_id);
+            getDistanceTime(location.s_id);
           });
         });
       });
@@ -536,7 +564,9 @@ const LocationAccess = () => {
                     <div
                       key={feature.av_id}
                       className={`flex flex-col justify-center items-center gap-2 bg-green-100 hover:bg-green-200 text-black font-bold shadow-b-lg rounded-2xl pt-2 pb-4 px-6 min-w-5/6 sm:min-w-2/3 lg:min-w-1/3 `}
-                      onClick={() => { navigate(`/booking/${selectedStation.s_id}`) }}
+                      onClick={() => {
+                        handleAvailableSlotBar(selectedStation, feature);
+                      }}
                     >
                       <h1 className=" text-black text-md md:text-lg">Booking Slot - {index + 1} </h1>
                       <div className="grid grid-cols-2 gap-1 text-black">
@@ -545,7 +575,7 @@ const LocationAccess = () => {
 
                         <h1 className="text-green-600 text-md md:text-lg">{getTime(feature.av_start_time, feature.av_end_time)}</h1>
                         <h1 className="text-black text-md md:text-lg">Available: <span className="text-green-600">{" " + feature.av_slots}</span></h1>
-                        <h1 className="text-black text-md md:text-lg">Total Cost: <span className="text-green-600">{" $" + getCost(feature.cost, feature.av_start_time, feature.av_end_time)}</span></h1>
+                        <h1 className="text-black text-md md:text-lg">Total Cost: <span className="text-green-600">{" ₹" + feature.cost}</span></h1>
                       </div>
                     </div>
                   );
@@ -589,6 +619,7 @@ const LocationAccess = () => {
                           essential: true,
                         });
                         handleStationClick(location.s_id);
+                        getDistanceTime(location.s_id);
                       }
                       setSearch("")
                       clearRoute();

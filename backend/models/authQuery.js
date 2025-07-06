@@ -41,7 +41,6 @@ const createTables = async () => {
       end_time TIME NOT NULL, 
       book_date DATE NOT NULL, 
       slots INT NOT NULL, 
-      type VARCHAR(20) NOT NULL, 
       amount REAL NOT NULL,
       time_stamp TIMESTAMP NOT NULL, 
       FOREIGN KEY (s_id) REFERENCES station(s_id),
@@ -55,7 +54,6 @@ const createTables = async () => {
         av_book_date DATE NOT NULL, 
         av_slots INT NOT NULL,
         cost INT NOT NULL,
-        counter INT DEFAULT 0, 
         FOREIGN KEY (s_id) REFERENCES station(s_id),
         UNIQUE (s_id, av_book_date, av_start_time));`);
       console.log("created available")

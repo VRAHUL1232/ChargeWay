@@ -20,30 +20,11 @@ const FormattedDate = (dateObj) => {
   return formattedDate
 }
 
-const FormattedDate2 = (dateNow) => {
-  const [date, time] = dateNow.split(', ');
-  const [day, month, year] = date.split('/');
-
-  const formattedIST = `${year}-${month}-${day}T${time}`;
-  console.log(time)
-  return formattedIST;
-}
-
 
 const getAvailableStations = async (stationId) => {
   try {
-    const availableSlot = await pool.query(`SELECT * FROM available where s_id=$1`, [stationId]);
-    const currentDateTimeIST = new Date().toLocaleString("en-GB", {
-      timeZone: "Asia/Kolkata",
-      hour12: false,
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit"
-    });
-    const currentDateTime = new Date(FormattedDate2(currentDateTimeIST)).getTime();
+    const availableSlot = await pool.query(`SELECT * FROM available where s_id=$1 AND av_slots>0`, [stationId]);
+    const currentDateTime = new Date().getTime();
     const filteredAvailableSlot = availableSlot.rows.filter((data) => {
       const newDate = FormattedDate(data.av_book_date) + 'T' + data.av_start_time;
       const availableDateTime = new Date(newDate);
@@ -52,12 +33,12 @@ const getAvailableStations = async (stationId) => {
       }
       return false;
     });
-    const sortedFilteredAvailableSlot = filteredAvailableSlot.sort((a,b)=> {
+    const sortedFilteredAvailableSlot = filteredAvailableSlot.sort((a, b) => {
       const newDate1 = FormattedDate(a.av_book_date) + 'T' + a.av_start_time;
       const newDateTime1 = new Date(newDate1);
       const newDate2 = FormattedDate(b.av_book_date) + 'T' + b.av_start_time;
       const newDateTime2 = new Date(newDate2);
-      return newDateTime1-newDateTime2;
+      return newDateTime1 - newDateTime2;
     })
     console.log(sortedFilteredAvailableSlot)
     return sortedFilteredAvailableSlot;
@@ -66,7 +47,30 @@ const getAvailableStations = async (stationId) => {
   }
 }
 
+const getCheckAvailableSlot = async (availableId, slots) => {
+  try {
+    const availableSlotData = await pool.query('SELECT * FROM available WHERE av_id = $1', [availableId]);
+    const data = availableSlotData.rows[0];
+    if (data.av_slots < slots) {
+      return false;
+    }
+    const currentDateTime = new Date().getTime();
+    const newDate = FormattedDate(data.av_book_date) + 'T' + data.av_start_time;
+    const availableDateTime = new Date(newDate).getTime();
+    // console.log(currentDateTime,availableDateTime, new Date(currentDateTime), new Date(availableDateTime), "comparison")
+    if (currentDateTime >= availableDateTime) {
+      return false;
+    }
+    return true
+  } catch (error) {
+    console.log(error)
+    return false
+  }
+}
+
+
 module.exports = {
   getStations,
-  getAvailableStations
+  getAvailableStations,
+  getCheckAvailableSlot
 };

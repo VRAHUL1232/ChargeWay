@@ -54,8 +54,37 @@ const logout = async (req, res) => {
   res.send("Logout Page");
 };
 
+const getUserId = async (req, res) => {
+  try {
+    const authHeader = req.headers["authorization"];
+    const token = authHeader?.split(" ")[1];
+    const role = req.headers["role"];
+    console.log("role", role);
+    if (!token)
+      return res
+        .status(401)
+        .json({ message: "Token Not Found", isAuth: false });
+
+    jwt.verify(token, process.env.SECRETKEY, async (err, user) => {
+      if (err) {
+        return res.status(401).json({ message: "Unauthorized token" });
+      }
+      console.log(user);
+      const newUser = await query.findUser(user.email, role);
+      console.log(newUser);
+      if (!newUser) {
+        return res.status(401).json({ message: "User Not Found!" });
+      }
+      return res.status(200).json({ message: "Verified", userId: newUser.id });
+    });
+  } catch (err) {
+    return res.status(500).json({ message: err, isAuth: false });
+  }
+}
+
 module.exports = {
   login,
   register,
   logout,
+  getUserId
 };

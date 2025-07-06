@@ -16,6 +16,7 @@ const HOSTIP = process.env.HOSTIP;
 const query = require("../models/authQuery");
 const authRoute = require("../routes/authRoute");
 const dashboardRoute = require('../routes/dashboard')
+const bookingRoute = require("../routes/booking");
 
 query.createTables();
 
@@ -26,6 +27,8 @@ app.get("/", (req, res) => {
 app.use("/", authRoute);
 
 app.use("/",dashboardRoute);
+
+app.use("/",bookingRoute)
 
 app.listen(PORT , () => {
   console.log(`Server is running in http://localhost:/api/${PORT}`);

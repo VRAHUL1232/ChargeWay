@@ -21,14 +21,34 @@ const availableSlot = async (req, res) => {
   try {
     const stationId = req.params.stationId;
     const data = await query.getAvailableStations(stationId);
-    return res.status(200).json({data : data})
+    return res.status(200).json({ data: data })
   } catch (err) {
     console.log(err)
+  }
+}
+
+const bookSlot = async (req, res) => {
+  
+}
+
+const checkAvailableSlot = async (req,res) => {
+  try {
+    const {availableId, slots} = req.body;
+    const response = await query.getCheckAvailableSlot(availableId, slots);
+    if (response){
+      return res.status(200).json({message: "Slots are available"});
+    } else {
+      return res.status(409).json({message: "The slot is not valid"});
+    }
+  } catch (error) {
+    res.status(500).json({error: "Server is not responding."})
   }
 }
 
 
 module.exports = {
   stationData,
-  availableSlot
+  availableSlot,
+  bookSlot,
+  checkAvailableSlot
 };

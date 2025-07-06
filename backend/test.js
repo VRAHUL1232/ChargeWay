@@ -1360,8 +1360,8 @@ const insertStations = async (req, res) => {
 const insertAvailable = async (req, res) => {
   try {
     const values = [];
-    for (let i = 1; i < 2; i++) {
-      tmp = [i, "10:40:00", "12:30:00", "2025-06-30", 3, 20, 3];
+    for (let i = 1; i < 3; i++) {
+      tmp = [i, "10:00:00", "01:30:00", "2025-07-05", 5, 32];
       values.push(tmp);
     }
     const query = `INSERT INTO available (s_id,
@@ -1369,9 +1369,8 @@ const insertAvailable = async (req, res) => {
         av_end_time,
         av_book_date,
         av_slots,
-        cost,
-        counter
-        ) VALUES ($1,$2,$3,$4,$5,$6,$7)`;
+        cost
+        ) VALUES ($1,$2,$3,$4,$5,$6)`;
 
     values.map(async (data) => {
       const result = await pool.query(query, data);
@@ -1385,6 +1384,17 @@ const insertAvailable = async (req, res) => {
 const deleteAvailable = async (req, res) => {
   try {
     const query = `DELETE FROM available`;
+
+    const result = await pool.query(query);
+    console.log("success");
+  } catch (err) {
+    console.error("Insert error:", err);
+  }
+};
+
+const deleteBooking = async (req, res) => {
+  try {
+    const query = `DELETE FROM bookings`;
 
     const result = await pool.query(query);
     console.log("success");
@@ -1426,7 +1436,6 @@ const getAvailable = async (req, res) => {
       second: "2-digit"
     });
     const currentDateTime = new Date(FormattedDate2(currentDateTimeIST)).getTime();
-    console.log(currentDateTime, "now date hash", Date.now())
     const dates = result.rows.map((data) => {
       const newDate = FormattedDate(data.av_book_date) + 'T' + data.av_start_time;
       const availableDateTime = new Date(newDate);
@@ -1441,4 +1450,4 @@ const getAvailable = async (req, res) => {
 }
 
 
-getAvailable()
+deleteBooking()

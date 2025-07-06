@@ -12,4 +12,6 @@ router.get('/logout',authMiddleware.authenticate, authController.logout);
 
 router.get('/userauth',authMiddleware.isVerified);
 
+router.get('/getUserId', authController.getUserId)
+
 module.exports = router;
