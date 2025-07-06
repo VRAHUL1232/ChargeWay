@@ -29,7 +29,7 @@ export default function Booking() {
     const [openConfirm, setOpenConfirm] = useState(false);
     const [userId, setUserId] = useState(null);
     const navigate = useNavigate();
-
+    const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST
 
     const subtotal = slots * bookingDetails.cost;
     const platformFee = Math.max(Math.round(subtotal * 0.02), 1)
@@ -55,7 +55,7 @@ export default function Booking() {
         const getBookingData = async () => {
             try {
                 setIsLoading2(true);
-                const response = await axios.get(`http://localhost:3000/getCurrentStation/${id}`);
+                const response = await axios.get(`${VITE_LOCALHOST}/getCurrentStation/${id}`);
                 setBookingDetails(response.data.bookingData)
                 console.log(response.data.bookingData.av_book_date, "response");
             } catch (err) {
@@ -67,7 +67,7 @@ export default function Booking() {
         const getUserId = async () => {
             try {
                 setIsLoading2(true)
-                const response = await axiosInstance.get(`http://localhost:3000/getUserId`);
+                const response = await axiosInstance.get(`${VITE_LOCALHOST}/getUserId`);
                 if (response.status === 200) {
                     console.log(response.data.userId);
                     setUserId(response.data.userId)
@@ -87,7 +87,7 @@ export default function Booking() {
             setIsLoading(true);
             const axiosRequest = new Promise((resolve, reject) => {
                 try {
-                    const response = axios.post('http://localhost:3000/bookSlot',
+                    const response = axios.post(`${VITE_LOCALHOST}/bookSlot`,
                         {
                             userId: userId,
                             av_id: id,

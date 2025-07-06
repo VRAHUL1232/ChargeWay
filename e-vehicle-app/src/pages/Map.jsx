@@ -130,7 +130,7 @@ const LocationAccess = () => {
   const handleAvailableSlotBar = async (selectedStation, currentAvailableSlot) => {
     try {
       setLoading(true);
-      const response = await axios.post("http://localhost:3000/checkAvailable", {
+      const response = await axios.post(`${VITE_LOCALHOST}/checkAvailable`, {
         availableId: currentAvailableSlot.av_id,
         slots: 1
       });
