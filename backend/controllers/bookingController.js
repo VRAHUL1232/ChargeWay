@@ -1,4 +1,4 @@
-const { bookingSlot, currentBookingData } = require("../models/bookingQuery");
+const { bookingSlot, currentBookingData, getBookingsData } = require("../models/bookingQuery");
 
 const queues = new Map();
 
@@ -75,7 +75,19 @@ const getCurrentBookingData = async (req, res) => {
   }
 }
 
+const getBookings = async (req,res) => {
+  try {
+    const {userId} = req.body
+    const data = await getBookingsData(userId);
+    res.status(200).json({data:data})
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({error:err.message})
+  }
+}
+
 module.exports = {
   handleQueuedProcess,
-  getCurrentBookingData
+  getCurrentBookingData,
+  getBookings
 };

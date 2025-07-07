@@ -4,6 +4,7 @@ import LocationAccess from "./Map";
 import axios from "axios";
 import { StationLocationContext } from "../context/stationLocation";
 import Spinner from "../components/Spinner";
+import BookingSlots from "./BookedSlot";
 
 const Router = ({ children }) => children;
 const Routes = ({ children }) => children;
@@ -16,15 +17,6 @@ const ProfilePage = () => (
     <h1 className="text-3xl font-bold text-gray-800 mb-4">Profile</h1>
     <p className="text-gray-600">
       Manage your profile information and preferences here.
-    </p>
-  </div>
-);
-
-const BookingsPage = () => (
-  <div className="p-6">
-    <h1 className="text-3xl font-bold text-gray-800 mb-4">Bookings</h1>
-    <p className="text-gray-600">
-      View and manage your bookings and reservations.
     </p>
   </div>
 );
@@ -53,7 +45,7 @@ const Sidebar = ({ isOpen, toggleSidebar, currentPage, setCurrentPage }) => {
       id: "bookings",
       label: "Bookings",
       icon: Calendar,
-      component: BookingsPage,
+      component: BookingSlots,
     },
     {
       id: "settings",

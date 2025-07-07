@@ -73,7 +73,19 @@ const currentBookingData = async (bookingId) => {
     }
 }
 
+async function getBookingsData (userId) {
+    try {
+        const client = await pool.connect()
+        const data = await client.query(`SELECT * FROM bookings WHERE u_id = $1`, [userId]);
+        console.log(data.rows);
+        return data.rows;
+    } catch (err) {
+        console.log(err);
+    }
+}
+
 module.exports = {
     bookingSlot,
-    currentBookingData
+    currentBookingData,
+    getBookingsData
 };

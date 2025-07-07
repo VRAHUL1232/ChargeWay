@@ -1360,8 +1360,8 @@ const insertStations = async (req, res) => {
 const insertAvailable = async (req, res) => {
   try {
     const values = [];
-    for (let i = 1; i < 3; i++) {
-      tmp = [i, "10:00:00", "01:30:00", "2025-07-05", 5, 32];
+    for (let i = 3; i <= 3; i++) {
+      tmp = [i, "10:00:00", "01:30:00", "2025-07-07", 3, 32];
       values.push(tmp);
     }
     const query = `INSERT INTO available (s_id,
@@ -1450,4 +1450,4 @@ const getAvailable = async (req, res) => {
 }
 
 
-deleteBooking()
+insertAvailable()

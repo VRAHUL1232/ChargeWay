@@ -289,7 +289,7 @@ export default function Booking() {
             <div className={`p-6 space-y-6`}>
                 {/* Station Information */}
                 <div className={`flex flex-col justify-start items-start gap-4 bg-green-50 rounded-xl p-4`}>
-                    <h2 className="font-bold text-lg text-gray-800 flex items-center">
+                    <h2 className="font-bold text-lg sm:text-xl text-gray-800 flex items-center">
                         <Zap className="w-5 h-5 mr-2 text-green-600" />
                         Station Details
                     </h2>
@@ -305,28 +305,28 @@ export default function Booking() {
 
                     <div className="flex flex-wrap gap-4 justify-start items-center">
                         <div className="flex flex-row items-center justify-center"><Calendar className="w-4 h-4 mr-1 text-green-600" />
-                            <span className="text-gray-700">{FormattedDate(bookingDetails.av_book_date)}</span></div>
+                            <span className="text-gray-700 text-lg">{FormattedDate(bookingDetails.av_book_date)}</span></div>
                         <div className="flex flex-row items-center justify-center"><Clock className="w-4 h-4 mr-1 text-green-600" />
-                            <span className="text-gray-700">{bookingDetails.av_start_time.slice(0, 5) + ' - ' + bookingDetails.av_end_time.slice(0, 5)}</span></div>
+                            <span className="text-gray-700 text-lg">{bookingDetails.av_start_time.slice(0, 5) + ' - ' + bookingDetails.av_end_time.slice(0, 5)}</span></div>
                     </div>
                 </div>
 
                 {/* Bill Summary */}
                 <div className="bg-gray-50 rounded-xl p-4">
-                    <h2 className="font-bold text-lg text-gray-800 mb-4">Bill Summary</h2>
+                    <h2 className="font-bold text-lg sm:text-xl text-gray-800 mb-4">Bill Summary</h2>
                     <div className="space-y-3">
                         <div className="flex justify-between items-center">
-                            <span className="text-gray-600">
+                            <span className="text-gray-600 text-lg">
                                 Cost Per Slot
                             </span>
                             <span className="text-lg sm:text-xl font-bold text-gray-800 text-center px-5">₹{bookingDetails.cost}</span>
                         </div>
                         <div className="flex justify-between items-center">
-                            <span className="text-gray-600">Platform Fee (2%)</span>
+                            <span className="text-gray-600 text-lg">Platform Fee (2%)</span>
                             <span className="text-lg sm:text-xl font-bold text-gray-800 min-w-[3rem] text-center px-5">₹{platformFee}</span>
                         </div>
                         <div className="flex justify-between items-center">
-                            <span className="text-gray-600">Number of Slots</span>
+                            <span className="text-gray-600 text-lg">Number of Slots</span>
                             <div className="flex items-center space-x-5">
                                 <button
                                     onClick={() => handleSlotChange(-1)}
@@ -361,7 +361,7 @@ export default function Booking() {
                     onClick={() => { setOpenConfirm(true) }}
                     className="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
                 >
-                    <div className="flex items-center justify-center">
+                    <div className="flex items-center justify-center text-xl">
                         <Zap className="w-5 h-5 mr-2" />
                         Book Charging Slot - ₹{total}
                     </div>

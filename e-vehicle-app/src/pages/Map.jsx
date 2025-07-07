@@ -11,6 +11,10 @@ import "../index.css";
 import { UserLocationContext } from "../context/userLocation";
 import { StationLocationContext } from "../context/stationLocation";
 import { motion, AnimatePresence } from 'framer-motion';
+import type1 from "../assets/type1.png"
+import type2 from "../assets/type2.png"
+import type3 from "../assets/type3.png"
+import type4 from "../assets/type4.png"
 import axios from "axios";
 import { replace, useNavigate } from "react-router-dom";
 import axiosInstance from "../middleware/axiosInstance";
@@ -547,12 +551,12 @@ const LocationAccess = () => {
                 Direction
               </button>
             </div>
-            <div className="flex flex-wrap gap-2 items-center justify-center">
+            <div className="flex flex-wrap gap-3 items-center justify-center">
               <h1 className="text-lg text-green-700 font-bold">Available Port:</h1>
-              {selectedStation.ac1 == true ? <div>AC1</div> : <></>}
-              {selectedStation.ac2 == true ? <div>AC2</div> : <></>}
-              {selectedStation.dc1 == true ? <div>DC1</div> : <></>}
-              {selectedStation.dc2 == true ? <div>DC2</div> : <></>}
+              {selectedStation.ac1 == true ? <div><img src={type1} className="w-10 h-10 text-green-600"></img></div> : <></>}
+              {selectedStation.ac2 == true ? <div><img src={type2} className="w-10 h-10 text-green-600"></img></div> : <></>}
+              {selectedStation.dc1 == true ? <div><img src={type3} className="w-10 h-10 text-green-600"></img></div> : <></>}
+              {selectedStation.dc2 == true ? <div><img src={type4} className="w-10 h-10 text-green-600"></img></div> : <></>}
             </div>
             <div className="w-full h-auto">
               <div className="flex overflow-x-auto custom-scrollbar mx-auto w-full gap-3 md:gap-6 h-auto">
