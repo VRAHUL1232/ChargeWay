@@ -187,6 +187,7 @@ const LocationAccess = () => {
         mapRef.current.flyTo({
           center: [newLocation.longitude, newLocation.latitude],
           zoom: 12,
+          offset: [0, -100],
           essential: true,
         });
       }
@@ -222,6 +223,7 @@ const LocationAccess = () => {
         mapRef.current.flyTo({
           center: [location.longitude, location.latitude],
           zoom: 12,
+          offset: [0, -100],
           essential: true,
         });
       }
@@ -245,6 +247,7 @@ const LocationAccess = () => {
             mapRef.current.flyTo({
               center: [pos.coords.longitude, pos.coords.latitude],
               zoom: 12,
+              offset: [0, -100],
               essential: true,
             });
             markLocation(newLocation);
@@ -365,6 +368,7 @@ const LocationAccess = () => {
         mapRef.current.flyTo({
           center: [location.longitude, location.latitude],
           zoom: 12,
+          offset: [0, -100],
           essential: true,
         });
       }
