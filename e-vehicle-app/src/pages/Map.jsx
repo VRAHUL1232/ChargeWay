@@ -51,7 +51,7 @@ const LocationAccess = () => {
     const el = document.createElement("div");
     el.innerHTML = `
   <div style="position: relative;">
-    <div style="width: 28px; height: 28px; background-color: #3b82f6; border-radius: 50%; border: 2px solid white; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);"></div>
+    <div style="width: 24px; height: 24px; background-color: #3b82f6; border-radius: 50%; border: 2px solid white; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);"></div>
     <div style="position: absolute; top: -8px; left: -8px; right: -8px; bottom: -8px; background-color: #3b82f6; border-radius: 50%; opacity: 0.3; animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;"></div>
   </div>
 `;
@@ -517,8 +517,6 @@ const LocationAccess = () => {
         </div>
       )}
 
-
-
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -527,119 +525,40 @@ const LocationAccess = () => {
             exit={{ y: '100%', opacity: 1 }}
             transition={{ duration: 0.5 }}
 
-            className="fixed bottom-0 left-0 md:left-64 right-0 h-auto bg-white rounded-t-4xl p-6 md:p-8 z-50 flex flex-col gap-2 md:gap-4 items-start justify-center"
+            className="fixed bottom-0 left-0 md:left-64 right-0 h-auto bg-white rounded-t-4xl p-6 md:p-8 z-50 flex flex-col gap-1 md:gap-4 items-start justify-center"
           >
-            <div className="flex flex-row justify-between gap-2 w-full items-center">
-              <h2 className="text-2xl font-bold truncate max-w-full">{selectedStation.name}</h2>
+            <div className="flex flex-row justify-between gap-1 md:gap-2 w-full items-center">
+              <h2 className="text-lg md:text-2xl font-bold truncate max-w-full">{selectedStation.name}</h2>
               <button
                 onClick={() => { closeModal(); clearRoute() }}
-                className="text-red-800 font-bold text-2xl "
+                className="text-red-800 font-bold text-xl md:text-2xl "
               >
                 X
               </button>
             </div>
-            <div className="flex flex-wrap gap-x-6 gap-y-2 md:gap-y-4 w-full items-center justify-between">
-              <p className="truncate max-w-full">{selectedStation.address}</p>
-              <div className="text-green-700 text-lg font-bold xl:w-1/4 ">
-                Contact: <span className="text-black font-semibold">{selectedStation.phone_number}</span>
+            <div className="flex flex-wrap gap-x-6 gap-y-1 md:gap-y-4 w-full items-center justify-between">
+              <p className="truncate text-sm md:text-lg max-w-full">{selectedStation.address}</p>
+              <div className="text-green-700 text-lg md:text-xl font-bold xl:w-1/4 ">
+                Contact: <span className="text-black text-lg md:text-xl font-semibold">{selectedStation.phone_number}</span>
               </div>
-              <div className="text-green-700 text-lg  font-bold xl:w-1/4">
-                Review: <span className="text-black">{selectedStation.review} <span style={{ color: 'gold', fontSize: '24px' }}>★</span></span>
+              <div className="text-green-700 text-lg md:text-xl font-bold xl:w-1/4">
+                Review: <span className="text-black text-lg md:text-xl font-semibold">{selectedStation.review} <span style={{ color: 'gold', fontSize: '24px' }}>★</span></span>
               </div>
-              <div className="text-green-700 text-lg font-bold xl:w-1/4">
-                Distance: <span className="text-black">{distance} Km</span>
+              <div className="text-green-700 text-lg md:text-xl font-bold xl:w-1/4">
+                Distance: <span className="text-black text-lg md:text-xl font-semibold">{distance} Km</span>
               </div>
-              <div className="text-green-700 text-lg font-bold xl:w-1/4">
-                Duration: <span className="text-black">{time} Min</span>
+              <div className="text-green-700 text-lg md:text-xl font-bold xl:w-1/4">
+                Duration: <span className="text-black text-lg md:text-xl font-semibold">{time} Min</span>
               </div>
               <button
                 onClick={() => { getRoute({ longitude: selectedStation.lng, latitude: selectedStation.lat }) }}
-                className="px-3 py-2 font-bold text-md w-auto flex justify-center items-center bg-red-500 hover:bg-red-600 text-white rounded-2xl"
+                className="px-3 py-2 font-bold text-md md:text-xl w-auto flex justify-center items-center bg-red-500 hover:bg-red-600 text-white rounded-2xl"
               >
                 Direction
               </button>
             </div>
             <div className="flex flex-wrap gap-3 items-center justify-center">
-              <h1 className="text-lg text-green-700 font-bold">Available Port:</h1>
-              {selectedStation.ac1 == true ? <div><img src={type1} className="w-10 h-10 text-green-600"></img></div> : <></>}
-              {selectedStation.ac2 == true ? <div><img src={type2} className="w-10 h-10 text-green-600"></img></div> : <></>}
-              {selectedStation.dc1 == true ? <div><img src={type3} className="w-10 h-10 text-green-600"></img></div> : <></>}
-              {selectedStation.dc2 == true ? <div><img src={type4} className="w-10 h-10 text-green-600"></img></div> : <></>}
-            </div>
-            <div className="w-full h-auto">
-              <div className="flex overflow-x-auto custom-scrollbar mx-auto w-full gap-3 md:gap-6 h-auto">
-                {stationFeatures.length == 0 && <div
-                  className={`flex flex-col justify-center items-center text-gray-500 text-xl font-bold w-full py-8`}
-                >No Slots Available!</div>}
-                {stationFeatures.length > 0 && stationFeatures?.map((feature, index) => {
-                  return (
-                    <div
-                      key={feature.av_id}
-                      className={`flex flex-col justify-center items-center gap-2 bg-green-100 hover:bg-green-200 text-black font-bold shadow-b-lg rounded-2xl pt-2 pb-4 px-6 min-w-5/6 sm:min-w-2/3 lg:min-w-1/3 `}
-                      onClick={() => {
-                        handleAvailableSlotBar(selectedStation, feature);
-                      }}
-                    >
-                      <h1 className=" text-black text-md md:text-lg">Booking Slot - {index + 1} </h1>
-                      <div className="grid grid-cols-2 gap-1 text-black">
-
-                        <h1 className="text-green-600 text-md md:text-lg">{getDate(feature.av_book_date)}</h1>
-
-                        <h1 className="text-green-600 text-md md:text-lg">{getTime(feature.av_start_time, feature.av_end_time)}</h1>
-                        <h1 className="text-black text-md md:text-lg">Available: <span className="text-green-600">{" " + feature.av_slots}</span></h1>
-                        <h1 className="text-black text-md md:text-lg">Total Cost: <span className="text-green-600">{" ₹" + feature.cost}</span></h1>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {isOpen2 && (
-          <motion.div
-            initial={{ y: '100%', opacity: 1 }}
-            animate={{ y: '0%', opacity: 1 }}
-            exit={{ y: '100%', opacity: 1 }}
-            transition={{ duration: 0.5 }}
-
-            className="fixed bottom-0 left-0 md:left-64 right-0 h-auto bg-white rounded-t-4xl p-6 md:p-8 z-50 flex flex-col gap-2 md:gap-4 items-start justify-center"
-          >
-            <div className="flex flex-row justify-between gap-2 w-full items-center">
-              <h2 className="text-2xl font-bold truncate max-w-full">{selectedStation.name}</h2>
-              <button
-                onClick={() => { closeModal(); clearRoute() }}
-                className="text-red-800 font-bold text-2xl "
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="flex flex-wrap gap-x-6 gap-y-2 md:gap-y-4 w-full items-center justify-between">
-              <p className="truncate max-w-full">{selectedStation.address}</p>
-              <div className="text-green-700 text-lg font-bold xl:w-1/4 ">
-                Contact: <span className="text-black font-semibold">{selectedStation.phone_number}</span>
-              </div>
-              <div className="text-green-700 text-lg  font-bold xl:w-1/4">
-                Review: <span className="text-black">{selectedStation.review} <span style={{ color: 'gold', fontSize: '24px' }}>★</span></span>
-              </div>
-              <div className="text-green-700 text-lg font-bold xl:w-1/4">
-                Distance: <span className="text-black">{distance} Km</span>
-              </div>
-              <div className="text-green-700 text-lg font-bold xl:w-1/4">
-                Duration: <span className="text-black">{time} Min</span>
-              </div>
-              <button
-                onClick={() => { getRoute({ longitude: selectedStation.lng, latitude: selectedStation.lat }) }}
-                className="px-3 py-2 font-bold text-md w-auto flex justify-center items-center bg-red-500 hover:bg-red-600 text-white rounded-2xl"
-              >
-                Direction
-              </button>
-            </div>
-            <div className="flex flex-wrap gap-3 items-center justify-center">
-              <h1 className="text-lg text-green-700 font-bold">Available Port:</h1>
+              <h1 className="text-lg md:text-xl text-green-700 font-bold">Available Port:</h1>
               {selectedStation.ac1 == true ? <div><img src={type1} className="w-10 h-10 text-green-600"></img></div> : <></>}
               {selectedStation.ac2 == true ? <div><img src={type2} className="w-10 h-10 text-green-600"></img></div> : <></>}
               {selectedStation.dc1 == true ? <div><img src={type3} className="w-10 h-10 text-green-600"></img></div> : <></>}
