@@ -27,41 +27,46 @@ const availableSlot = async (req, res) => {
   }
 }
 
-const checkAvailableSlot = async (req,res) => {
+const checkAvailableSlot = async (req, res) => {
   try {
-    const {availableId, slots} = req.body;
+    const { availableId, slots } = req.body;
     const response = await query.getCheckAvailableSlot(availableId, slots);
-    if (response){
-      return res.status(200).json({message: "Slots are available"});
+    if (response) {
+      return res.status(200).json({ message: "Slots are available" });
     } else {
-      return res.status(409).json({message: "The slot is not valid"});
+      return res.status(409).json({ message: "The slot is not valid" });
     }
   } catch (error) {
-    res.status(500).json({error: "Server is not responding."})
+    res.status(500).json({ error: "Server is not responding." })
   }
 }
 
 function getDistanceKm(lat1, lon1, lat2, lon2) {
-  const latDiff = Math.abs(lat2 - lat1) * 111; 
+  lat1 = Number(lat1);
+  lon1 = Number(lon1);
+  lat2 = Number(lat2);
+  lon2 = Number(lon2);
   const avgLat = (lat1 + lat2) / 2;
-  const lonDiff = Math.abs(lon2 - lon1) * 111 * Math.cos(avgLat * Math.PI / 180); 
-
+  const avgLatRad = avgLat * Math.PI / 180;
+  const latDiff = (lat2 - lat1) * 111;
+  const lonDiff = (lon2 - lon1) * 111 * Math.cos(avgLatRad);
   const distance = Math.sqrt(latDiff ** 2 + lonDiff ** 2);
-  return distance;
+
+  return distance.toFixed(1);
 }
 
-const getNearbyStations = async (req,res)=> {
+const getNearbyStations = async (req, res) => {
   try {
-    const {latitude, longitude} = req.query;
+    const { latitude, longitude } = req.query;
     const stationData = await query.getNearbyStation();
-    const newFormattedData = stationData.map((data)=> {
-      const newData = {...data, distance: getDistanceKm(data.lat,data.lng,latitude,longitude)};
+    const newFormattedData = stationData.map((data) => {
+      const newData = { ...data, distance: getDistanceKm(data.lat, data.lng, latitude, longitude) };
       return newData
     })
-    const sortedStationData = newFormattedData.sort((a,b)=> {
-      return a.distance-b.distance
+    const sortedStationData = newFormattedData.sort((a, b) => {
+      return a.distance - b.distance
     })
-    res.status(200).json({message:"good",data:sortedStationData});
+    res.status(200).json({ message: "good", data: sortedStationData .slice(0,15)});
   } catch (err) {
     console.log(err);
   }

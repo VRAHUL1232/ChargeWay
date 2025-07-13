@@ -604,7 +604,7 @@ const LocationAccess = () => {
 
             className="fixed right-0 left-1/3 md:left-2/5 lg:left-2/3 top-0 bottom-0 h-auto bg-white rounded-l-xl p-4 md:p-6 z-50 flex flex-col gap-1 md:gap-4 items-start justify-center"
           >
-            <PetrolStationPopup onClose={()=> {setIsOpen2(false)}} onSelectedStation={handleStationClick} />
+            <PetrolStationPopup onClose={()=> {setIsOpen2(false)}} onSelectedStation={handleStationClick} getDistanceTime={getDistanceTime}  />
           </motion.div>
         )}
       </AnimatePresence>

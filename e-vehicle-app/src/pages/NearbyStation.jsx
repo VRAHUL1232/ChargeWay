@@ -2,98 +2,30 @@ import React, { useContext, useEffect, useState } from 'react';
 import { MapPin, Clock, Phone, Globe, Star, Navigation, X } from 'lucide-react';
 import axios from 'axios';
 import { UserLocationContext } from '../context/userLocation';
+import Spinner from '../components/Spinner';
 
-const PetrolStationPopup = ({ onClose, onSelectedStation }) => {
+const PetrolStationPopup = ({ onClose, onSelectedStation , getDistanceTime}) => {
 
-    const { location, setLocationData } = useContext(UserLocationContext);
+    const { location } = useContext(UserLocationContext);
 
     const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST
 
-    const petrolStations = [
-        {
-            id: 1,
-            name: "Nayara petrol bunk",
-            rating: 4.8,
-            reviews: 9,
-            address: "Petrol Pump • 14 Jaykrishna Nagar, SH 113",
-            hours: "Open 24 hours",
-            isOpen: true,
-            phone: null,
-            website: null,
-            services: []
-        },
-        {
-            id: 2,
-            name: "Ponarasi Enterprise",
-            rating: 4.3,
-            reviews: 108,
-            address: "Petrol Pump • Somangalam Road Junction / N.V.R.D",
-            hours: "Open 24 hours",
-            isOpen: true,
-            phone: "022 2286 3900",
-            website: null,
-            services: []
-        },
-        {
-            id: 3,
-            name: "IndianOil",
-            rating: 4.0,
-            reviews: 42,
-            address: "Petrol Pump • Lock 117O/121, SN 610/6A16A2, Kundrathur - Sriperumbudur Rd, near Nungambakkam",
-            hours: "Open • Closes 10:30 pm",
-            isOpen: true,
-            phone: "098415 25205",
-            website: "https://iocl.com",
-            services: ["On-site services"]
-        },
-        {
-            id: 4,
-            name: "Essar Petrol Pump",
-            rating: 3.7,
-            reviews: 120,
-            address: "Petrol Pump • X3G2+R8O",
-            hours: "Open • Closes 5 pm",
-            isOpen: true,
-            phone: "1800 120 0330",
-            website: null,
-            services: []
-        },
-        {
-            id: 5,
-            name: "Bharat Petroleum, Petrol Pump - Venkateshwara Fuels",
-            rating: 4.0,
-            reviews: 118,
-            address: "Petrol Pump • SRIPREUMPUR RD.,SIRUGALATH",
-            hours: "Open • Closes 10:30 pm",
-            isOpen: true,
-            phone: null,
-            website: null,
-            services: []
-        },
-        {
-            id: 6,
-            name: "Shell Petrol Bunk",
-            rating: 4.2,
-            reviews: 101,
-            address: "Petrol Pump • Main Road, Near City Center",
-            hours: "Open • Closes 11 pm",
-            isOpen: true,
-            phone: "044 2345 6789",
-            website: "https://shell.com",
-            services: ["Car wash", "Convenience store"]
-        }
-    ];
-
+    const [nearbyData, setNearbyData] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         const fetchNearbyStations = async () => {
             try {
+                setIsLoading(true);
                 const response = await axios.get(`${VITE_LOCALHOST}/getNearbyStation`, {
                     params: location,
                 });
                 console.log(response.data);
+                setNearbyData(response.data.data);
             } catch (err) {
                 console.error("Error fetching stations:", err);
+            } finally {
+                setIsLoading(false)
             }
         };
 
@@ -126,19 +58,20 @@ const PetrolStationPopup = ({ onClose, onSelectedStation }) => {
         <div
             className="p-4 border-b-1 border-gray-300 cursor-pointer transition-colors hover:bg-gray-100"
             onClick={() => {
-                onSelectedStation(station.id)
+                getDistanceTime(station.s_id)
+                onSelectedStation(station.s_id)
                 onClose()
             }}
         >
             <div className="flex items-start justify-between">
                 <div className="flex flex-col gap-1">
                     <h3 className="font-medium text-gray-900 mb-1">{station.name}</h3>
-                    <p className="text-sm text-gray-600 ">{station.address}</p>
+                    <p className="text-sm text-gray-600 ">{station.address.length>45 ? station.address.slice(0,45)+'...' : station.address}</p>
 
                     <div className="flex items-center gap-1 ">
-                        <span className="text-sm font-medium text-gray-700">{station.rating}</span>
+                        <span className="text-sm font-medium text-gray-700">{station.review}</span>
                         <div className="flex items-center gap-1">
-                            {renderStars(station.rating)}
+                            {renderStars(station.review)}
                         </div>
                     </div>
 
@@ -147,16 +80,23 @@ const PetrolStationPopup = ({ onClose, onSelectedStation }) => {
                         <p className='text-green-500 text-md'>Available</p>
                     </div>
 
-                    {station.phone && (
-                        <div className="flex items-center gap-2 text-sm text-gray-600 ">
-                            <Phone className="w-4 h-4" />
-                            <span>{station.phone}</span>
-                        </div>
-                    )}
+
+                    <div className="flex items-center gap-2 text-sm text-gray-600 ">
+                        <p>Distance</p>
+                        <span>{station.distance} Km</span>
+                    </div>
                 </div>
             </div>
         </div>
     );
+
+    if (isLoading) {
+        return (
+            <Spinner
+                style={"absolute top-1/2 left-1/2 transform -translate-x-1/2 z-20"}
+            />
+        )
+    }
 
     return (
         <div className="h-full w-full bg-white z-50 flex flex-col">
@@ -176,8 +116,8 @@ const PetrolStationPopup = ({ onClose, onSelectedStation }) => {
             </div>
             {/* Content */}
             <div className="flex-1 overflow-y-auto custom-scrollbar">
-                {petrolStations.map((station) => (
-                    <StationCard key={station.id} station={station} />
+                {nearbyData?.map((station) => (
+                    <StationCard key={station.s_id} station={station} />
                 ))}
             </div>
         </div>
