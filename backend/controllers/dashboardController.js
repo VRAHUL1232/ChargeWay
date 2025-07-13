@@ -27,10 +27,6 @@ const availableSlot = async (req, res) => {
   }
 }
 
-const bookSlot = async (req, res) => {
-  
-}
-
 const checkAvailableSlot = async (req,res) => {
   try {
     const {availableId, slots} = req.body;
@@ -45,10 +41,36 @@ const checkAvailableSlot = async (req,res) => {
   }
 }
 
+function getDistanceKm(lat1, lon1, lat2, lon2) {
+  const latDiff = Math.abs(lat2 - lat1) * 111; 
+  const avgLat = (lat1 + lat2) / 2;
+  const lonDiff = Math.abs(lon2 - lon1) * 111 * Math.cos(avgLat * Math.PI / 180); 
+
+  const distance = Math.sqrt(latDiff ** 2 + lonDiff ** 2);
+  return distance;
+}
+
+const getNearbyStations = async (req,res)=> {
+  try {
+    const {latitude, longitude} = req.query;
+    const stationData = await query.getNearbyStation();
+    const newFormattedData = stationData.map((data)=> {
+      const newData = {...data, distance: getDistanceKm(data.lat,data.lng,latitude,longitude)};
+      return newData
+    })
+    const sortedStationData = newFormattedData.sort((a,b)=> {
+      return a.distance-b.distance
+    })
+    res.status(200).json({message:"good",data:sortedStationData});
+  } catch (err) {
+    console.log(err);
+  }
+}
+
 
 module.exports = {
   stationData,
   availableSlot,
-  bookSlot,
-  checkAvailableSlot
+  checkAvailableSlot,
+  getNearbyStations
 };

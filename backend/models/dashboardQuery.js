@@ -20,6 +20,15 @@ const FormattedDate = (dateObj) => {
   return formattedDate
 }
 
+const getNearbyStation = async () => {
+  try {
+    const nearbyStations = await pool.query(`SELECT s.* FROM station s WHERE s_id IN (SELECT s_id FROM available GROUP BY s_id HAVING SUM(av_slots) > 0)`)
+    return nearbyStations.rows;
+  } catch (err) {
+    console.log(err);
+  }
+}
+
 
 const getAvailableStations = async (stationId) => {
   try {
@@ -72,5 +81,6 @@ const getCheckAvailableSlot = async (availableId, slots) => {
 module.exports = {
   getStations,
   getAvailableStations,
-  getCheckAvailableSlot
+  getCheckAvailableSlot,
+  getNearbyStation
 };

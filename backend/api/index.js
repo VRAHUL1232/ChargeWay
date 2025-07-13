@@ -31,7 +31,7 @@ app.use("/",dashboardRoute);
 app.use("/",bookingRoute)
 
 app.listen(PORT , () => {
-  console.log(`Server is running in http://localhost:/api/${PORT}`);
+  console.log(`Server is running in http://localhost:${PORT}`);
 });
 
 module.exports = app

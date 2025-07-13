@@ -9,4 +9,6 @@ router.get('/availableSlot/:stationId',dashboardController.availableSlot);
 
 router.post('/checkAvailable',dashboardController.checkAvailableSlot);
 
+router.get('/getNearbyStation', dashboardController.getNearbyStations)
+
 module.exports = router;

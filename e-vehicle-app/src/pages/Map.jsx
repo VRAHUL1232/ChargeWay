@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
 import {
+  FastForward,
   LocateFixed,
+  LocateIcon,
 } from "lucide-react";
 import { X, Clock, MapPin, Fuel, Zap, Car, CreditCard, Star, Wifi, Store, Wrench } from 'lucide-react';
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -18,6 +20,8 @@ import type4 from "../assets/type4.png"
 import axios from "axios";
 import { replace, useNavigate } from "react-router-dom";
 import axiosInstance from "../middleware/axiosInstance";
+import Nearby from "../assets/nearby.png"
+import PetrolStationPopup from "./NearbyStation";
 
 
 const LocationAccess = () => {
@@ -55,14 +59,6 @@ const LocationAccess = () => {
     <div style="position: absolute; top: -8px; left: -8px; right: -8px; bottom: -8px; background-color: #3b82f6; border-radius: 50%; opacity: 0.3; animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;"></div>
   </div>
 `;
-    {/* <svg 
-    class="w-8 h-8 sm:w-12 sm:h-12" 
-    viewBox="0 0 20 20" 
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <circle cx="10" cy="10" r="8" fill="#2563EB" />
-    <circle cx="10" cy="10" r="4" fill="white" />
-  </svg> */}
 
     const map = mapRef.current;
     new mapboxgl.Marker(el)
@@ -86,15 +82,12 @@ const LocationAccess = () => {
   const getDistanceTime = async (id) => {
     try {
       const currentStation = stationData?.data.find((location) => location.s_id === id);
-      const query = await fetch(
-        `https://api.mapbox.com/directions/v5/mapbox/driving/${location.longitude},${location.latitude};${currentStation.lng},${currentStation.lat}?steps=true&geometries=geojson&access_token=${mapboxgl.accessToken}`
-      );
-      const json = await query.json();
-      console.log(json, "json data")
-      const newDistance = json.routes[0].distance;
-      const newDuration = json.routes[0].duration;
-      setDistance((newDistance / 1000).toFixed(1));
-      setTime((newDuration / 60).toFixed(0));
+      const latDiff = Math.abs(location.latitude - currentStation.lat) * 111;
+      const avgLat = (location.latitude + currentStation.lat) / 2;
+      const lonDiff = Math.abs(location.longitude - currentStation.lng) * 111 * Math.cos(avgLat * Math.PI / 180); 
+      const distance = Math.sqrt(latDiff ** 2 + lonDiff ** 2);
+      setDistance((distance).toFixed(1));
+      setTime((distance*60 / 20).toFixed(0));
     } catch (error) {
       console.log(error);
     }
@@ -357,6 +350,7 @@ const LocationAccess = () => {
 
   useEffect(() => {
     if (!mapRef.current) {
+      getCurrentLocation();
       mapRef.current = new mapboxgl.Map({
         container: mapContainerRef.current,
         style: "mapbox://styles/mapbox/streets-v9",
@@ -375,12 +369,12 @@ const LocationAccess = () => {
       const map = mapRef.current;
       map.on("load", () => {
         markLocation(location);
-        stationData?.data.map((location) => {
+        stationData?.data.map((station) => {
           const el = document.createElement("div");
           el.innerHTML =
             '<svg class="w-8 h-8 sm:w-12 sm:h-12 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path></svg>';
           new mapboxgl.Marker(el)
-            .setLngLat([location.lng, location.lat])
+            .setLngLat([station.lng, station.lat])
             .addTo(map);
           const popup = new mapboxgl.Popup({
             closeButton: false,
@@ -388,18 +382,18 @@ const LocationAccess = () => {
             offset: 25,
           }).setHTML(`
     <div class="text-sm rounded-lg text-gray-800">
-      <h3 class="font-bold text-lg text-green-700">${location.name + location.s_id}</h3>
-      <p>${location.address || "No address available"}</p>
+      <h3 class="font-bold text-lg text-green-700">${station.name + station.s_id}</h3>
+      <p>${station.address || "No address available"}</p>
     </div>
   `);
           el.addEventListener("mouseenter", () =>
-            popup.addTo(map).setLngLat([location.lng, location.lat])
+            popup.addTo(map).setLngLat([station.lng, station.lat])
           );
           el.addEventListener("mouseleave", () => popup.remove());
           el.addEventListener("click", () => {
             clearRoute();
-            handleStationClick(location.s_id);
-            getDistanceTime(location.s_id);
+            getDistanceTime(station.s_id);
+            handleStationClick(station.s_id);
           });
         });
       });
@@ -600,6 +594,21 @@ const LocationAccess = () => {
         )}
       </AnimatePresence>
 
+      <AnimatePresence>
+        {isOpen2 && (
+          <motion.div
+            initial={{ x: '100%', opacity: 1 }}
+            animate={{ x: '0%', opacity: 1 }}
+            exit={{ x: '100%', opacity: 1 }}
+            transition={{ duration: 0.5 }}
+
+            className="fixed right-0 left-1/3 md:left-2/5 lg:left-2/3 top-0 bottom-0 h-auto bg-white rounded-l-xl p-4 md:p-6 z-50 flex flex-col gap-1 md:gap-4 items-start justify-center"
+          >
+            <PetrolStationPopup onClose={()=> {setIsOpen2(false)}} onSelectedStation={handleStationClick} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="absolute w-3/4 top-4 left-1/2 transform -translate-x-1/2 z-10">
         <input
           type="text"
@@ -632,8 +641,8 @@ const LocationAccess = () => {
                           zoom: 15,
                           essential: true,
                         });
-                        handleStationClick(location.s_id);
                         getDistanceTime(location.s_id);
+                        handleStationClick(location.s_id);
                       }
                       setSearch("")
                       clearRoute();
@@ -652,12 +661,20 @@ const LocationAccess = () => {
         )}
       </div>
       <div className="absolute right-8 top-5/6 transform -translate-y-5/6 md:right-12 z-10">
-        <button
-          onClick={getCurrentLocation}
-          className="bg-white p-3 md:p-5 rounded-2xl shadow-md transition"
-        >
-          <LocateFixed className="w-6 h-6 md:w-8 md:h-8 text-blue-700" />
-        </button>
+        <div className="flex flex-col gap-4 md:gap-6">
+          <button
+            onClick={()=> {setIsOpen2(true)}}
+            className="bg-white p-3 md:p-5 rounded-2xl shadow-md transition"
+          >
+            <img src={Nearby} className="w-6 h-6 md:w-8 md:h-8 text-blue-700" />
+          </button>
+          <button
+            onClick={getCurrentLocation}
+            className="bg-white p-3 md:p-5 rounded-2xl shadow-md transition"
+          >
+            <LocateFixed className="w-6 h-6 md:w-8 md:h-8 text-blue-700" />
+          </button>
+        </div>
       </div>
     </div>
   );
