@@ -79,7 +79,7 @@ const LocationAccess = () => {
     return null;
   };
 
-  const getDistanceTime = async (id) => {
+  const getDistanceTime = (id) => {
     try {
       const currentStation = stationData?.data.find((location) => location.s_id === id);
       const latDiff = Math.abs(location.latitude - currentStation.lat) * 111;
