@@ -88,6 +88,7 @@ const LocationAccess = () => {
       const distance = Math.sqrt(latDiff ** 2 + lonDiff ** 2);
       setDistance((distance).toFixed(1));
       setTime((distance*60 / 20).toFixed(0));
+      return distance;
     } catch (error) {
       console.log(error);
     }
@@ -393,7 +394,7 @@ const LocationAccess = () => {
           el.addEventListener("click", async () => {
             clearRoute();
             getDistanceTime(station.s_id);
-            handleStationClick(station.s_id);
+            await handleStationClick(station.s_id);
           });
         });
       });
@@ -557,10 +558,10 @@ const LocationAccess = () => {
             </div>
             <div className="flex flex-wrap gap-3 items-center justify-center">
               <h1 className="text-lg md:text-xl text-green-700 font-bold">Available Port:</h1>
-              {selectedStation.ac1 == true ? <div><img src={type1} className="w-10 h-10 text-green-600"></img></div> : <></>}
-              {selectedStation.ac2 == true ? <div><img src={type2} className="w-10 h-10 text-green-600"></img></div> : <></>}
-              {selectedStation.dc1 == true ? <div><img src={type3} className="w-10 h-10 text-green-600"></img></div> : <></>}
-              {selectedStation.dc2 == true ? <div><img src={type4} className="w-10 h-10 text-green-600"></img></div> : <></>}
+              {selectedStation.ac1 == true ? <div><img src={type1} className="w-6 h-6 text-green-600"></img></div> : <></>}
+              {selectedStation.ac2 == true ? <div><img src={type2} className="w-6 h-6 text-green-600"></img></div> : <></>}
+              {selectedStation.dc1 == true ? <div><img src={type3} className="w-6 h-6 text-green-600"></img></div> : <></>}
+              {selectedStation.dc2 == true ? <div><img src={type4} className="w-6 h-6 text-green-600"></img></div> : <></>}
             </div>
             <div className="w-full h-auto">
               <div className="flex overflow-x-auto custom-scrollbar mx-auto w-full gap-3 md:gap-6 h-auto">
@@ -571,7 +572,7 @@ const LocationAccess = () => {
                   return (
                     <div
                       key={feature.av_id}
-                      className={`flex flex-col justify-center items-center gap-2 bg-green-100 hover:bg-green-200 text-black font-bold shadow-b-lg rounded-2xl pt-2 pb-4 px-6 min-w-5/6 sm:min-w-2/3 lg:min-w-1/3 `}
+                      className={`flex flex-col justify-center items-center gap-2 bg-green-100 hover:bg-green-200 text-black font-bold shadow-b-lg rounded-2xl pt-2 pb-4 px-3 sm:px-6 min-w-5/6 sm:min-w-2/3 lg:min-w-1/3 `}
                       onClick={() => {
                         handleAvailableSlotBar(selectedStation, feature);
                       }}
@@ -633,7 +634,7 @@ const LocationAccess = () => {
                   <div
                     key={location.id}
                     className="flex items-center space-x-2 p-2 sm:p-3 md:p-4 hover:bg-gray-50 cursor-pointer"
-                    onClick={() => {
+                    onClick={ async () => {
                       if (mapRef.current) {
                         mapRef.current.flyTo({
                           center: [location.lng, location.lat],
@@ -642,7 +643,7 @@ const LocationAccess = () => {
                           essential: true,
                         });
                         getDistanceTime(location.s_id);
-                        handleStationClick(location.s_id);
+                        await handleStationClick(location.s_id);
                       }
                       setSearch("")
                       clearRoute();
