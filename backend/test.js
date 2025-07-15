@@ -1361,7 +1361,7 @@ const insertAvailable = async (req, res) => {
   try {
     const values = [];
     for (let i = 1; i <= 56; i++) {
-      tmp = [i, "19:00:00", "19:45:00", "2025-07-16", Math.floor(Math.random() * (6 - 2 + 1)) + 2, Math.floor(Math.random() * (50 - 20 + 1)) + 20];
+      tmp = [i, "21:00:00", "21:45:00", "2025-07-16", Math.floor(Math.random() * (6 - 2 + 1)) + 2, Math.floor(Math.random() * (50 - 20 + 1)) + 20];
       values.push(tmp);
     }
     const query = `INSERT INTO available (s_id,
