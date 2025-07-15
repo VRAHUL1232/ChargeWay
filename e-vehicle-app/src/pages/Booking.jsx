@@ -210,9 +210,9 @@ export default function Booking() {
     }
 
     return (
-        <div className={`min-h-screen w-full sm:w-3/4 xl:w-1/2 flex flex-col justify-center m-auto px-4 py-4`}>
+        <div className={`min-h-screen w-full sm:w-3/4 xl:w-1/2 flex flex-col justify-start sm:justify-center m-auto px-4 py-4`}>
             {openConfirm && (
-                <div className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-100 px-12" style={{ backgroundColor: 'rgba(0, 0, 0, 0.2)' }}>
+                <div className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-100 px-8" style={{ backgroundColor: 'rgba(0, 0, 0, 0.2)' }}>
                     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-auto transform transition-all duration-300 scale-100">
                         <div className="p-6">
                             {/* Header */}
@@ -289,14 +289,14 @@ export default function Booking() {
             <div className={`p-6 space-y-6`}>
                 {/* Station Information */}
                 <div className={`flex flex-col justify-start items-start gap-4 bg-green-50 rounded-xl p-4`}>
-                    <h2 className="font-bold text-lg sm:text-xl text-gray-800 flex items-center">
+                    <h2 className="font-bold text-md sm:text-xl text-gray-800 flex items-center">
                         <Zap className="w-5 h-5 mr-2 text-green-600" />
                         Station Details
                     </h2>
 
                     <div className="flex items-start">
                         <Building className="w-4 h-4 mr-2 text-green-600 mt-1 flex-shrink-0" />
-                        <h3 className="font-semibold text-lg text-gray-900 ">{bookingDetails.name.split(" ").length > 15 ? bookingDetails.name.split(' ').slice(0, 15).join(" ") + '...' : bookingDetails.name}</h3>
+                        <h3 className="font-semibold text-md sm:text-lg text-gray-900 ">{bookingDetails.name.split(" ").length > 15 ? bookingDetails.name.split(' ').slice(0, 15).join(" ") + '...' : bookingDetails.name}</h3>
                     </div>
                     <div className="flex items-start">
                         <MapPin className="w-4 h-4 mr-2 text-green-600 mt-1 flex-shrink-0" />
@@ -305,28 +305,28 @@ export default function Booking() {
 
                     <div className="flex flex-wrap gap-4 justify-start items-center">
                         <div className="flex flex-row items-center justify-center"><Calendar className="w-4 h-4 mr-1 text-green-600" />
-                            <span className="text-gray-700 text-lg">{FormattedDate(bookingDetails.av_book_date)}</span></div>
+                            <span className="text-gray-700 text-md sm:text-lg">{FormattedDate(bookingDetails.av_book_date)}</span></div>
                         <div className="flex flex-row items-center justify-center"><Clock className="w-4 h-4 mr-1 text-green-600" />
-                            <span className="text-gray-700 text-lg">{bookingDetails.av_start_time.slice(0, 5) + ' - ' + bookingDetails.av_end_time.slice(0, 5)}</span></div>
+                            <span className="text-gray-700 text-md sm:text-lg">{bookingDetails.av_start_time.slice(0, 5) + ' - ' + bookingDetails.av_end_time.slice(0, 5)}</span></div>
                     </div>
                 </div>
 
                 {/* Bill Summary */}
                 <div className="bg-gray-50 rounded-xl p-4">
-                    <h2 className="font-bold text-lg sm:text-xl text-gray-800 mb-4">Bill Summary</h2>
-                    <div className="space-y-3">
+                    <h2 className="font-bold text-md sm:text-xl text-gray-800 mb-4">Bill Summary</h2>
+                    <div className="space-y-2 sm:space-y-4">
                         <div className="flex justify-between items-center">
-                            <span className="text-gray-600 text-lg">
+                            <span className="text-gray-600 text-md sm:text-lg">
                                 Cost Per Slot
                             </span>
-                            <span className="text-lg sm:text-xl font-bold text-gray-800 text-center px-5">₹{bookingDetails.cost}</span>
+                            <span className="text-md sm:text-xl font-bold text-gray-800 text-center px-5">₹{bookingDetails.cost}</span>
                         </div>
                         <div className="flex justify-between items-center">
-                            <span className="text-gray-600 text-lg">Platform Fee (2%)</span>
-                            <span className="text-lg sm:text-xl font-bold text-gray-800 min-w-[3rem] text-center px-5">₹{platformFee}</span>
+                            <span className="text-gray-600 text-md sm:text-lg">Platform Fee (2%)</span>
+                            <span className="text-md sm:text-xl font-bold text-gray-800 min-w-[3rem] text-center px-5">₹{platformFee}</span>
                         </div>
                         <div className="flex justify-between items-center">
-                            <span className="text-gray-600 text-lg">Number of Slots</span>
+                            <span className="text-gray-600 text-md sm:text-lg">Number of Slots</span>
                             <div className="flex items-center space-x-5">
                                 <button
                                     onClick={() => handleSlotChange(-1)}
@@ -335,7 +335,7 @@ export default function Booking() {
                                 >
                                     <Minus className="w-4 h-4" />
                                 </button>
-                                <span className="text-lg sm:text-xl font-bold text-gray-800 text-center">
+                                <span className="text-md sm:text-xl font-bold text-gray-800 text-center">
                                     {slots}
                                 </span>
                                 <button
@@ -349,7 +349,7 @@ export default function Booking() {
                         </div>
                         <div className="border-t pt-3">
                             <div className="flex justify-between items-center">
-                                <span className="text-lg font-bold text-gray-800">Total Amount</span>
+                                <span className="text-md sm:text-lg font-bold text-gray-800">Total Amount</span>
                                 <span className="text-lg sm:text-xl font-bold text-green-600">₹{total}</span>
                             </div>
                         </div>
@@ -361,7 +361,7 @@ export default function Booking() {
                     onClick={() => { setOpenConfirm(true) }}
                     className="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
                 >
-                    <div className="flex items-center justify-center text-xl">
+                    <div className="flex items-center justify-center text-lg sm:text-xl">
                         <Zap className="w-5 h-5 mr-2" />
                         Book Charging Slot - ₹{total}
                     </div>

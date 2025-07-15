@@ -390,7 +390,7 @@ const LocationAccess = () => {
             popup.addTo(map).setLngLat([station.lng, station.lat])
           );
           el.addEventListener("mouseleave", () => popup.remove());
-          el.addEventListener("click", () => {
+          el.addEventListener("click", async () => {
             clearRoute();
             getDistanceTime(station.s_id);
             handleStationClick(station.s_id);

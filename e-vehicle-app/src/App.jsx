@@ -17,7 +17,7 @@ function App() {
       <Route path="/" element={<Homepage />} />
       <Route path="/login" element={<AuthPage isLogin={true} />} />
       <Route path="/register" element={<AuthPage isLogin={false} />} />
-      <Route path="/booking/:id" element={<ProtectedRoute isAllowed={["User"]}><Booking /></ProtectedRoute>} />
+      <Route path="/booking/:id" element={<Booking/>} />
       <Route
         path="/adminpanel"
         element={
