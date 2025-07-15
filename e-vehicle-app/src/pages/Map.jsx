@@ -543,12 +543,12 @@ const LocationAccess = () => {
               <div className="text-green-700 text-lg md:text-xl font-bold xl:w-1/4">
                 Review: <span className="text-black text-lg md:text-xl font-semibold">{selectedStation.review} <span style={{ color: 'gold', fontSize: '24px' }}>★</span></span>
               </div>
-              <div className="text-green-700 text-lg md:text-xl font-bold xl:w-1/4">
+              {/* <div className="text-green-700 text-lg md:text-xl font-bold xl:w-1/4">
                 Distance: <span className="text-black text-lg md:text-xl font-semibold">{distance} Km</span>
               </div>
               <div className="text-green-700 text-lg md:text-xl font-bold xl:w-1/4">
                 Duration: <span className="text-black text-lg md:text-xl font-semibold">{time} Min</span>
-              </div>
+              </div> */}
               <button
                 onClick={() => { getRoute({ longitude: selectedStation.lng, latitude: selectedStation.lat }) }}
                 className="px-3 py-2 font-bold text-md md:text-xl w-auto flex justify-center items-center bg-red-500 hover:bg-red-600 text-white rounded-2xl"
